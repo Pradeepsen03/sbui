@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:root@123@localhost:5432/dashUi?schema=public"
+}
+
+
+model User {
+  id        String   @id @default(uuid()) 
+  name      String
+  email     String   @unique // Unique email
+  password  String   // Hashed password
+  role      Role     @default(USER) // Default role set to 'USER'
+  createdAt DateTime @default(now()) 
+}
+
+enum Role {
+  USER
+  ADMIN
+  ACC
+}
+
+model ProductionCompany {
+  id        Int      @id @default(autoincrement())  
+  name      String   @unique   
+  website   String?  
+  email     String   @unique  
+  phone     String?  
+
+  projects  ProductionCompanyProject[]
+
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt      
+}
+
+model ProjectManager {
+  id        Int      @id @default(autoincrement())  
+  firstName String   
+  lastName  String   
+  email     String   @unique
+  phone     String?  
+
+  projects  ProjectManagerProject[]
+
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt  
+}
+
+model Client {
+  id        Int      @id @default(autoincrement())  
+  firstName String   
+  lastName  String   
+  email     String   @unique
+  phone     String?  
+  streetAddress String?
+  streetAddress2 String?
+  city      String?
+  state     String?
+  zip       String?
+  contactPersonFirst String?
+  contactPersonLast  String?
+  note      String?  
+
+  projects  ClientProject[]
+
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt  
+}
+
+model Project {
+  id               Int      @id @default(autoincrement())  
+  projectName      String   
+  startDate        DateTime  
+  endDate          DateTime  
+  status           String   
+  projectNumber    Int       @default(1000)
+
+  productionCompanies  ProductionCompanyProject[]
+  clients             ClientProject[]
+  projectManagers     ProjectManagerProject[]
+  callSheets          CallSheet[]  // ✅ Add this relation
+
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt  
+}
+
+
+model ProductionCompanyProject {
+  productionCompanyId Int
+  projectId          Int
+  productionCompany   ProductionCompany @relation(fields: [productionCompanyId], references: [id])
+  project            Project @relation(fields: [projectId], references: [id])
+
+  @@id([productionCompanyId, projectId])
+}
+
+model ProjectManagerProject {
+  projectManagerId Int
+  projectId       Int
+  projectManager  ProjectManager @relation(fields: [projectManagerId], references: [id])
+  project         Project @relation(fields: [projectId], references: [id])
+
+  @@id([projectManagerId, projectId])
+}
+
+model ClientProject {
+  clientId  Int
+  projectId Int
+  client    Client @relation(fields: [clientId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
+
+  @@id([clientId, projectId])
+}
+
+
+
+model CallSheet {
+  id             Int      @id @default(autoincrement())
+  callSheetDate  DateTime
+  shootLocation  String
+  streetAddress  String?
+  streetAddress2 String?
+  city           String?
+  state          String?
+  zip            String?
+  startTime      DateTime
+  endTime        DateTime
+  parkingNotes   String?
+
+  projectId      Int
+  project        Project @relation(fields: [projectId], references: [id], onDelete: Cascade) 
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+
+
