@@ -35,7 +35,7 @@ export async function PATCH(req) {
         }
 
         // Find the existing project
-        const existingProject = await prisma.project.findUnique({
+        const existingProject = await prisma.projects.findUnique({
             where: { id: projectId },
         });
 
@@ -53,18 +53,18 @@ export async function PATCH(req) {
         };
 
         // Update the Project
-        const updatedProject = await prisma.project.update({
+        const updatedProject = await prisma.projects.update({
             where: { id: projectId },
             data: updateData,
         });
 
         // Step 2: Update Production Companies (if provided)
         if (productionCompany) {
-            await prisma.productionCompanyProject.deleteMany({
+            await prisma.productionCompanyProjects.deleteMany({
                 where: { projectId },
             });
 
-            await prisma.productionCompanyProject.create({
+            await prisma.productionCompanyProjects.create({
                 data: {
                     projectId,
                     productionCompanyId: productionCompany,
@@ -74,11 +74,11 @@ export async function PATCH(req) {
 
         // Step 3: Update Project Managers (if provided)
         if (projectManager) {
-            await prisma.projectManagerProject.deleteMany({
+            await prisma.projectManagerProjects.deleteMany({
                 where: { projectId },
             });
 
-            await prisma.projectManagerProject.create({
+            await prisma.projectManagerProjects.create({
                 data: {
                     projectId,
                     projectManagerId: projectManager,
@@ -88,11 +88,11 @@ export async function PATCH(req) {
 
         // Step 4: Update Clients (if provided)
         if (clientName) {
-            await prisma.clientProject.deleteMany({
+            await prisma.clientProjects.deleteMany({
                 where: { projectId },
             });
 
-            await prisma.clientProject.create({
+            await prisma.clientProjects.create({
                 data: {
                     projectId,
                     clientId: clientName,
@@ -100,8 +100,8 @@ export async function PATCH(req) {
             });
         }
 
-        // Fetch the updated project with relations
-        const formattedProject = await prisma.project.findUnique({
+        // Fetch the updated project with correct relations
+        const formattedProject = await prisma.projects.findUnique({
             where: { id: projectId },
             include: {
                 productionCompanies: {
@@ -119,8 +119,10 @@ export async function PATCH(req) {
                         client: { select: { id: true, firstName: true, lastName: true } },
                     },
                 },
+                callSheets: true, // This one is directly related to the project
             },
         });
+        
 
         return new Response(JSON.stringify({ data: formattedProject }), { status: 200 });
 

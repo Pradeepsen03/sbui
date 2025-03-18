@@ -42,7 +42,7 @@ export async function POST(req) {
         const endTimeISO = new Date(`${callSheetDate}T${endTime}`).toISOString();
 
         // Create a new CallSheet
-        const newCallSheet = await prisma.callSheet.create({
+        const newCallSheet = await prisma.callSheets.create({  // ✅ Ensure `callSheets` matches Prisma's generated client
             data: {
                 callSheetDate: callSheetDateISO,
                 shootLocation,

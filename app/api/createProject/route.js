@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -38,8 +38,8 @@ export async function POST(req) {
             });
         }
 
-        // Create a new project
-        const newProject = await prisma.project.create({
+        // Create a new project and link existing relations
+        const newProject = await prisma.projects.create({
             data: {
                 projectName,
                 startDate: new Date(startDate),
@@ -47,13 +47,13 @@ export async function POST(req) {
                 status,
                 projectNumber: projectNumberInt,
                 productionCompanies: {
-                    create: { productionCompanyId }
+                    create: [{ productionCompany: { connect: { id: productionCompanyId } } }]
                 },
                 clients: {
-                    create: { clientId }
+                    create: [{ client: { connect: { id: clientId } } }]
                 },
                 projectManagers: {
-                    create: { projectManagerId }
+                    create: [{ projectManager: { connect: { id: projectManagerId } } }]
                 }
             },
             include: {

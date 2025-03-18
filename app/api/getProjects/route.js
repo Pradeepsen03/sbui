@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req) {
     try {
-        const projects = await prisma.project.findMany({
+        const projects = await prisma.projects.findMany({
             include: {
                 productionCompanies: {
                     select: {

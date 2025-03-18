@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req) {
     try {
-        const client = await prisma.client.findMany({
+        const client = await prisma.clients.findMany({
             select: { firstName: true, lastName: true,id:true } // Fetch first and last name
         });
 

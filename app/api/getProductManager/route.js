@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req) {
     try {
-        const projectManagers = await prisma.projectManager.findMany({
+        const projectManagers = await prisma.projectManagers.findMany({
             select: { firstName: true, lastName: true ,id: true} // Fetch first and last name
         });
 

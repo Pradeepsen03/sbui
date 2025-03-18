@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,14 +7,14 @@ datasource db {
   url      = "postgresql://postgres:root@123@localhost:5432/dashUi?schema=public"
 }
 
-
-model User {
-  id        String   @id @default(uuid()) 
+model Users {
+  id        String   @id @default(uuid())
   name      String
   email     String   @unique // Unique email
-  password  String   // Hashed password
+  password  String // Hashed password
   role      Role     @default(USER) // Default role set to 'USER'
-  createdAt DateTime @default(now()) 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 enum Role {
@@ -29,101 +23,98 @@ enum Role {
   ACC
 }
 
-model ProductionCompany {
-  id        Int      @id @default(autoincrement())  
-  name      String   @unique   
-  website   String?  
-  email     String   @unique  
-  phone     String?  
+model ProductionCompanies {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  website String?
+  email   String  @unique
+  phone   String?
 
-  projects  ProductionCompanyProject[]
+  projects ProductionCompanyProjects[]
 
-  createdAt DateTime @default(now()) 
-  updatedAt DateTime @updatedAt      
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model ProjectManager {
-  id        Int      @id @default(autoincrement())  
-  firstName String   
-  lastName  String   
-  email     String   @unique
-  phone     String?  
+model ProjectManagers {
+  id        Int     @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String  @unique
+  phone     String?
 
-  projects  ProjectManagerProject[]
+  projects ProjectManagerProjects[]
 
-  createdAt DateTime @default(now()) 
-  updatedAt DateTime @updatedAt  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Client {
-  id        Int      @id @default(autoincrement())  
-  firstName String   
-  lastName  String   
-  email     String   @unique
-  phone     String?  
-  streetAddress String?
-  streetAddress2 String?
-  city      String?
-  state     String?
-  zip       String?
+model Clients {
+  id                 Int     @id @default(autoincrement())
+  firstName          String
+  lastName           String
+  email              String  @unique
+  phone              String?
+  streetAddress      String?
+  streetAddress2     String?
+  city               String?
+  state              String?
+  zip                String?
   contactPersonFirst String?
   contactPersonLast  String?
-  note      String?  
+  note               String?
 
-  projects  ClientProject[]
+  projects ClientProjects[]
 
-  createdAt DateTime @default(now()) 
-  updatedAt DateTime @updatedAt  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Project {
-  id               Int      @id @default(autoincrement())  
-  projectName      String   
-  startDate        DateTime  
-  endDate          DateTime  
-  status           String   
-  projectNumber    Int       @default(1000)
+model Projects {
+  id            Int      @id @default(autoincrement())
+  projectName   String
+  startDate     DateTime
+  endDate       DateTime
+  status        String
+  projectNumber Int      @default(1000)
 
-  productionCompanies  ProductionCompanyProject[]
-  clients             ClientProject[]
-  projectManagers     ProjectManagerProject[]
-  callSheets          CallSheet[]  // ✅ Add this relation
+  productionCompanies ProductionCompanyProjects[]
+  clients             ClientProjects[]
+  projectManagers     ProjectManagerProjects[]
+  callSheets          CallSheets[]
 
-  createdAt DateTime @default(now()) 
-  updatedAt DateTime @updatedAt  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-
-model ProductionCompanyProject {
+model ProductionCompanyProjects {
   productionCompanyId Int
-  projectId          Int
-  productionCompany   ProductionCompany @relation(fields: [productionCompanyId], references: [id])
-  project            Project @relation(fields: [projectId], references: [id])
+  projectId           Int
+  productionCompany   ProductionCompanies @relation(fields: [productionCompanyId], references: [id])
+  project             Projects            @relation(fields: [projectId], references: [id])
 
   @@id([productionCompanyId, projectId])
 }
 
-model ProjectManagerProject {
+model ProjectManagerProjects {
   projectManagerId Int
-  projectId       Int
-  projectManager  ProjectManager @relation(fields: [projectManagerId], references: [id])
-  project         Project @relation(fields: [projectId], references: [id])
+  projectId        Int
+  projectManager   ProjectManagers @relation(fields: [projectManagerId], references: [id])
+  project          Projects        @relation(fields: [projectId], references: [id])
 
   @@id([projectManagerId, projectId])
 }
 
-model ClientProject {
+model ClientProjects {
   clientId  Int
   projectId Int
-  client    Client @relation(fields: [clientId], references: [id])
-  project   Project @relation(fields: [projectId], references: [id])
+  client    Clients  @relation(fields: [clientId], references: [id])
+  project   Projects @relation(fields: [projectId], references: [id])
 
   @@id([clientId, projectId])
 }
 
-
-
-model CallSheet {
+model CallSheets {
   id             Int      @id @default(autoincrement())
   callSheetDate  DateTime
   shootLocation  String
@@ -136,12 +127,9 @@ model CallSheet {
   endTime        DateTime
   parkingNotes   String?
 
-  projectId      Int
-  project        Project @relation(fields: [projectId], references: [id], onDelete: Cascade) 
+  projectId Int
+  project   Projects @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
-
-

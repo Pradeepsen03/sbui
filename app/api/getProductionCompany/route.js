@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req) {
     try {
-        const prodCompanies = await prisma.productionCompany.findMany({
+        const prodCompanies = await prisma.productionCompanies.findMany({
             select: { name: true,id:true } // Only fetch the 'name' field
         });
 

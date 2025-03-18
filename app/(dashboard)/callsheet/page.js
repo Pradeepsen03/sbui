@@ -39,19 +39,25 @@ const TableComponent = () => {
     setFormData({
       id: row.id,
       projectId: row.projectId || "",
-      callSheetDate: row.callSheetDate || "",
+      callSheetDate: row.callSheetDate
+        ? new Date(row.callSheetDate).toISOString().split("T")[0] // Format as YYYY-MM-DD
+        : "",
       shootLocation: row.shootLocation || "",
       streetAddress: row.streetAddress || "",
       streetAddress2: row.streetAddress2 || "",
       city: row.city || "",
       state: row.state || "",
       zip: row.zip || "",
-      startTime: row.startTime || "",
-      endTime: row.endTime || "",
+      startTime: row.startTime
+        ? new Date(row.startTime).toISOString().split("T")[1].slice(0, 5) // Format as HH:MM
+        : "",
+      endTime: row.endTime
+        ? new Date(row.endTime).toISOString().split("T")[1].slice(0, 5) // Format as HH:MM
+        : "",
       parkingNotes: row.parkingNotes || "",
     });
 
-    setProjectId(row.id); // Set projectId for reference
+    setProjectId(row.id);
     setShowEditModal(true);
   };
 
@@ -139,6 +145,7 @@ const TableComponent = () => {
       if (response.ok) {
         console.log("Update Successful:", result);
         handleCloseEditModal();
+        await fetchCallSheets();
       } else {
         console.error("Update Failed:", result.error);
       }
@@ -290,8 +297,6 @@ const TableComponent = () => {
 
     fetchProjects();
   }, []);
-
-  console.log("ddaddadadadad", projects);
 
   return (
     <>

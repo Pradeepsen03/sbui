@@ -31,7 +31,7 @@ export async function PATCH(req) {
         }
 
         // Find the existing client
-        const existingClient = await prisma.client.findUnique({
+        const existingClient = await prisma.clients.findUnique({
             where: { id: clientId },
         });
 
@@ -41,14 +41,14 @@ export async function PATCH(req) {
 
         // Ensure email is unique if changed
         if (email && email !== existingClient.email) {
-            const emailExists = await prisma.client.findUnique({ where: { email } });
+            const emailExists = await prisma.clients.findUnique({ where: { email } });
             if (emailExists) {
                 return new Response(JSON.stringify({ error: "Email already in use" }), { status: 400 });
             }
         }
 
         // Update the Client
-        const updatedClient = await prisma.client.update({
+        const updatedClient = await prisma.clients.update({
             where: { id: clientId },
             data: {
                 firstName,
@@ -67,7 +67,7 @@ export async function PATCH(req) {
         });
 
         // Fetch the updated client with related projects (Fixing the include syntax)
-        const formattedClient = await prisma.client.findUnique({
+        const formattedClient = await prisma.clients.findUnique({
             where: { id: clientId },
             include: {
                 projects: {

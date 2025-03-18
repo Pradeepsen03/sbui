@@ -2,7 +2,6 @@ import { Display } from "node_modules/react-bootstrap-icons/dist";
 import { Badge } from "react-bootstrap";
 
 export const data = [
-
   {
     code: "h456wer53",
     name: "Bracelet",
@@ -737,7 +736,7 @@ export const data = [
     status: "INSTOCK",
     year: 2056,
     budget: 3260,
-  }
+  },
 ];
 
 export const stockCount = data.reduce((acc, item) => {
@@ -751,7 +750,7 @@ export const stockChartOptions = {
     toolbar: { show: false },
   },
   labels: ["Complete", "Pending", "Not-Assigned"],
-  colors: ["#634bffc4", "#ff5833a6", "#66C2FF"],
+  colors: ["#634BFF", "#FF5833", "#66C2FF"], // Solid colors, no gradient
   legend: {
     position: "bottom",
     labels: { colors: "#666", useSeriesColors: true },
@@ -764,6 +763,12 @@ export const stockChartOptions = {
   tooltip: {
     enabled: true,
     y: { formatter: (val) => `${val}%` },
+  },
+  plotOptions: {
+    pie: {
+      expandOnClick: false,
+      dataLabels: { offset: 0 },
+    },
   },
   responsive: [
     {
@@ -808,17 +813,19 @@ export const budgetChartOptions = {
     title: { text: "Average Budget ($)" },
   },
   stroke: {
-    curve: "smooth", // Smooth line
+    curve: "smooth",
     width: 2,
   },
   markers: {
-    size: 5,
-    colors: ["#00E396"], // Green markers for points
-    strokeColors: "#fff",
+    size: 3,
+    colors: ["#008FFB"], // Solid blue markers (same as line)
+    strokeColors: "#008FFB", // Match the line color
     strokeWidth: 2,
+    fillOpacity: 1, // Ensure solid color
+    shape: "circle", // Standard shape
   },
   grid: { show: false },
-  colors: ["#008FFB"], // Blue line color
+  colors: ["#008FFB"], // Solid blue line
   dataLabels: { enabled: false },
   tooltip: {
     enabled: true,
@@ -826,17 +833,8 @@ export const budgetChartOptions = {
     y: { formatter: (val) => `$${val}` },
   },
   fill: {
-    type: "gradient",
-    gradient: {
-      shade: "light",
-      type: "vertical",
-      shadeIntensity: 0.4,
-      gradientToColors: ["#00E396"],
-      inverseColors: false,
-      opacityFrom: 1,
-      opacityTo: 1,
-      stops: [0, 50, 100],
-    },
+    type: "solid",
+    opacity: 1,
   },
   toolbar: {
     show: true,
@@ -857,9 +855,9 @@ export const statusBadge = (status) => {
   const color =
     status === "completed"
       ? "success"
-      : status === "In progress"
+      : status === "IN_PROGRESS"
       ? "warning"
-      : status === "pending" && "danger";
+      : status === "PENDING" && "danger";
   return <Badge bg={color}>{status}</Badge>;
 };
 
@@ -922,60 +920,37 @@ export const ClientChartOptions = {
   grid: { show: false },
   plotOptions: {
     bar: {
-      borderRadius: 10,
+      borderRadius: 5, // Slightly rounded bars
       columnWidth: "30%",
       barHeight: "80%",
       distributed: false,
     },
   },
-  colors: ["#008FFB"], // Blue color for budget visualization
+  colors: ["#008FFB"], // Solid blue bars
   dataLabels: { enabled: false },
-  dropShadow: {
-    enabled: true,
-    top: 0,
-    left: 0,
-    blur: 3,
-    opacity: 0.5,
-  },
   fill: {
-    type: "gradient",
-    gradient: {
-      shade: "light",
-      type: "vertical",
-      shadeIntensity: 0.4,
-      gradientToColors: ["#00E396"], // Greenish gradient effect
-      inverseColors: false,
-      opacityFrom: 1,
-      opacityTo: 1,
-      stops: [0, 50, 100],
-    },
+    type: "solid", // Removed gradient
+    opacity: 1, // Ensures solid color
   },
   zoom: {
     enabled: true,
-    type: "x", // Can be 'x', 'y', or 'xy'
+    type: "x",
     autoScaleYaxis: true,
     zoomedArea: {
-      fill: {
-        color: "#90CAF9",
-        opacity: 0.4,
-      },
-      stroke: {
-        color: "#0D47A1",
-        opacity: 0.4,
-        width: 1,
-      },
+      fill: { color: "#90CAF9", opacity: 0.4 },
+      stroke: { color: "#0D47A1", opacity: 0.4, width: 1 },
     },
   },
   toolbar: {
     show: true,
     tools: {
-      download: true, // Enable download as PNG, SVG
-      selection: true, // Allow selecting parts of the chart
-      zoom: true, // Enable zooming
-      zoomin: true, // Zoom in button
-      zoomout: true, // Zoom out button
-      pan: true, // Enable panning
-      reset: true, // Reset zoom button
+      download: true,
+      selection: true,
+      zoom: true,
+      zoomin: true,
+      zoomout: true,
+      pan: true,
+      reset: true,
     },
     autoSelected: "zoom",
   },
@@ -1003,7 +978,7 @@ export const EquipmentChartOptions = {
   },
   xaxis: {
     categories: equipmentData.map((item) => item.type),
-    labels: { style: { colors: "#cccccc", fontSize: "10px" } }, // Light grey labels
+    labels: { style: { colors: "#cccccc", fontSize: "10px" } },
     title: { text: "Equipment Type" },
     scrollbar: {
       enabled: true,
@@ -1018,39 +993,18 @@ export const EquipmentChartOptions = {
   grid: { show: false },
   plotOptions: {
     bar: {
-      borderRadius: 10,
       columnWidth: "40%",
       distributed: true, // Different colors for each bar
     },
   },
-  colors: [
-    "#4A90E2",
-    "#7B61FF",
-    "#FF5A5F",
-    "#FF9F43",
-    "#2D4059",
-    "#17BEBB",
-    "#FFC312",
-  ],
+  colors: ["#007BFF"], // Solid colors
   dataLabels: { enabled: false },
-  dropShadow: {
-    enabled: true,
-    blur: 5,
-    opacity: 0.6,
-    color: "#1C1C1C",
-  },
   fill: {
-    type: "gradient",
-    gradient: {
-      shade: "dark",
-      type: "vertical",
-      shadeIntensity: 0.5,
-      gradientToColors: ["#1A2980", "#26D0CE"], // Deep blue & teal gradient
-      inverseColors: false,
-      opacityFrom: 0.9,
-      opacityTo: 1,
-      stops: [0, 50, 100],
-    },
+    type: "solid",
+    opacity: 1,
+  },
+  legend: {
+    show: false, // Hides the legend
   },
   zoom: {
     enabled: true,
@@ -1104,39 +1058,21 @@ export const CallProjectChartOptions = {
   grid: { show: false },
   plotOptions: {
     bar: {
-      borderRadius: 8,
       columnWidth: "50%",
       distributed: true,
     },
   },
-  colors: [
-    "#FF5733",
-    "#FFC300",
-    "#28A745",
-    "#007BFF",
-    "#6F42C1",
-    "#E83E8C",
-    "#17A2B8",
-  ],
+  colors: ["#007BFF"], // Solid colors
   dataLabels: { enabled: false },
   dropShadow: {
-    enabled: true,
-    blur: 5,
-    opacity: 0.6,
-    color: "#1C1C1C",
+    enabled: false, // Removed drop shadow for a cleaner look
   },
   fill: {
-    type: "gradient",
-    gradient: {
-      shade: "dark",
-      type: "vertical",
-      shadeIntensity: 0.5,
-      gradientToColors: ["#1A2980", "#26D0CE"],
-      inverseColors: false,
-      opacityFrom: 0.9,
-      opacityTo: 1,
-      stops: [0, 50, 100],
-    },
+    type: "solid", // Removed gradient
+    opacity: 1,
+  },
+  legend: {
+    show: false, // Hides the legend
   },
   zoom: {
     enabled: true,

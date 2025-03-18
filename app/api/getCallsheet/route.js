@@ -4,12 +4,9 @@ const prisma = new PrismaClient();
 
 export async function GET() {
     try {
-        const callSheets = await prisma.callSheet.findMany({
+        const callSheets = await prisma.callSheets.findMany({
             include: {
                 project: true 
-            },
-            orderBy: {
-                callSheetDate: 'desc' 
             }
         });
 

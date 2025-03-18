@@ -31,7 +31,7 @@ export async function POST(req) {
     }
 
     // Create Client
-    const newClient = await prisma.client.create({
+    const newClient = await prisma.clients.create({
       data: {
         firstName,
         lastName,

@@ -14,7 +14,7 @@ export async function POST(req) {
         }
 
         // Find user in the database
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.users.findUnique({ where: { email } });
         if (!user) {
             return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 401 });
         }

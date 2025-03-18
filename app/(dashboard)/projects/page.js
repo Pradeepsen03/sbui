@@ -307,7 +307,19 @@ console.log('kk',projects)
         row.projectManagers.map((pm) => pm.fullName).join(", ") || "N/A",
       sortable: true,
     },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <button
+          onClick={() => handleShowEditModal(row)}
+          className="btn btn-primary btn-sm"
+        >
+          Edit
+        </button>
+      ),
+    },
   ];
+  
 
   return (
     <>

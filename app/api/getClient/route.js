@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const clients = await prisma.client.findMany({
+    const clients = await prisma.clients.findMany({
       orderBy: { createdAt: "desc" }, // Sort by newest first
     });
 

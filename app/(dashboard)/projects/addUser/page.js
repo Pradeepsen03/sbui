@@ -1,5 +1,5 @@
 "use client";
-import { Form, Row, Col, Button, Container, Card } from "react-bootstrap";
+import { Form, Row, Col, Button, Container } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -91,8 +91,6 @@ const AddUserPage = () => {
           throw new Error(data.error || "Project creation failed");
         }
         router.push("/projects");
-        // await fetchProjects();
-        // handleCloseAddModal();
       } catch (err) {
         console.error(err.message);
       } finally {
@@ -100,19 +98,6 @@ const AddUserPage = () => {
       }
     }
   };
-
-  //   const fetchProjects = async () => {
-  //     try {
-  //       setIsGlobalLoading(true);
-  //       const response = await fetch("/api/getProjects");
-  //       const result = await response.json();
-  //       setProjects(result.data || []);
-  //     } catch (error) {
-  //       console.error("Error fetching projects:", error);
-  //     } finally {
-  //       setIsGlobalLoading(false);
-  //     }
-  //   };
 
   return (
     <Container className="mt-4">
@@ -214,9 +199,9 @@ const AddUserPage = () => {
                 onChange={handleChange}
               >
                 <option value="">Select Status</option>
-                <option value="in_progress">In Progress</option>
+                <option value="IN_PROGRESS">In Progress</option>
                 <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
+                <option value="PENDING">Pending</option>
               </Form.Select>
               {errors.status && (
                 <small className="text-danger">{errors.status}</small>
