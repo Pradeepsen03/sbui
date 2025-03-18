@@ -23,7 +23,6 @@ import { MdOutlineEdit } from "react-icons/md";
 import { statusBadge } from "/utils.js";
 import Link from "next/link";
 
-
 const TableComponent = () => {
   const [filterText, setFilterText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +62,6 @@ const TableComponent = () => {
       status: "",
       clientName: "",
       productionCompany: "",
-      
     });
     setErrors({});
   };
@@ -173,7 +171,7 @@ const TableComponent = () => {
   const handleEditSubmit = async () => {
     try {
       setIsUpdating(true);
-    console.log("nj",formData)
+      console.log("nj", formData);
 
       const response = await fetch("/api/editProject", {
         method: "PATCH",
@@ -246,7 +244,7 @@ const TableComponent = () => {
     }
   };
 
-console.log('kk',projects)
+  console.log("kk", projects);
 
   useEffect(() => {
     fetchProjects();
@@ -272,40 +270,52 @@ console.log('kk',projects)
       name: "Project Number",
       selector: (row) => row.projectNumber,
       sortable: true,
+      width: "180px",
     },
     {
       name: "Project Name",
       selector: (row) => row.projectName,
       sortable: true,
+      width: "200px",
     },
     {
       name: "Start Date",
       selector: (row) => new Date(row.startDate).toLocaleDateString(),
       sortable: true,
+      width: "150px",
     },
     {
       name: "End Date",
       selector: (row) => new Date(row.endDate).toLocaleDateString(),
       sortable: true,
+      width: "150px",
     },
-    { name: "Status", cell: (row) => statusBadge(row.status), sortable: true },
+    {
+      name: "Status",
+      cell: (row) => statusBadge(row.status),
+      sortable: true,
+      width: "130px",
+    },
     {
       name: "Production Companies",
       selector: (row) =>
         row.productionCompanies.map((pc) => pc.name).join(", ") || "N/A",
       sortable: true,
+      width: "210px",
     },
     {
       name: "Clients",
       selector: (row) =>
         row.clients.map((client) => client.fullName).join(", ") || "N/A",
       sortable: true,
+      width: "200px",
     },
     {
       name: "Project Managers",
       selector: (row) =>
         row.projectManagers.map((pm) => pm.fullName).join(", ") || "N/A",
       sortable: true,
+      width: "210px",
     },
     {
       name: "Actions",
@@ -317,6 +327,10 @@ console.log('kk',projects)
           Edit
         </button>
       ),
+      width: "120px",
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
     },
   ];
   
@@ -340,17 +354,19 @@ console.log('kk',projects)
           </Row>
 
           <div className="d-flex justify-content-end me-2">
-            <Link href="/projects/addUser">
-            <Button variant="primary" onClick={()=>router.push('/projects/addUser')}>
-              Add User
-            </Button>
+            <Link href="/projects/addProject">
+              <Button
+                variant="primary"
+                onClick={() => router.push("/projects/addProject")}
+              >
+                Add Project
+              </Button>
             </Link>
-
-     
           </div>
 
           <div className="d-flex justify-content-center flex-wrap mt-5 gap-3 mb-5">
             <ChartsComponent
+              key={window.location.pathname} // Ensures chart redraws when navigating
               type="pie"
               options={stockChartOptions}
               series={stockCount}
@@ -450,32 +466,6 @@ console.log('kk',projects)
                   </Col>
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Start Date</Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="startDate"
-                        value={formData.startDate}
-                        onChange={handleChange}
-                        className="custom-date-input"
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row className="mb-3">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>End Date</Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="endDate"
-                        value={formData.endDate}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
                       <Form.Label>Status</Form.Label>
                       <Form.Select
                         name="status"
@@ -488,6 +478,33 @@ console.log('kk',projects)
                       </Form.Select>
                     </Form.Group>
                   </Col>
+                </Row>
+
+                <Row className="mb-3">
+                <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Start Date</Form.Label>
+                      <Form.Control
+                        type="date"
+                        name="startDate"
+                        value={formData.startDate}
+                        onChange={handleChange}
+                        className="custom-date-input"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>End Date</Form.Label>
+                      <Form.Control
+                        type="date"
+                        name="endDate"
+                        value={formData.endDate}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+            
                 </Row>
 
                 <Row className="mb-3">

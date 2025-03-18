@@ -13,15 +13,23 @@ const ChartsComponent = ({
   containerClassname,
   title,
   id,
+  key
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const chartRef = useRef(null);
 
   const isDataAvailable = series && Object.values(series).length > 0;
 
+
+  useEffect(() => {
+    setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 100);
+  }, []);
+
   useEffect(() => {
     if (isDataAvailable) {
-      setTimeout(() => setIsLoading(false), 500); // Simulate slight delay for better UX
+      setTimeout(() => setIsLoading(false), 500); 
     } else {
       setIsLoading(true);
     }

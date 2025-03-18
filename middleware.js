@@ -43,5 +43,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ["/"], // Skip authentication and API routes
+    matcher: ["/","/vdashboard","/projects","/client","/callsheet","/crewMember"], // Skip authentication and API routes
 };

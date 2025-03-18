@@ -5,9 +5,22 @@ import DataTableComponent from "../../../components/DataTableComponent";
 import PaginationComponent from "../../../components/PaginateComponente";
 import ChartsComponent from "../../../components/ChartsComponent";
 import SearchExportComponent from "../../../components/SearchExportComponent";
-import { ClientChartOptions, clientChartData } from "../../../utils";
+import {
+  data,
+  stockChartOptions,
+  budgetChartOptions,
+  stockCount,
+  budgetChartData,
+  ClientChartOptions,
+  clientChartData,
+  equipmentChartData,
+  EquipmentChartOptions,
+  CallProjectChartOptions,
+  callProjectChartData,
+} from "../../../utils";
 import "../../../styles/dataTable.css";
 import { MdOutlineEdit } from "react-icons/md";
+import { statusBadge } from "/utils.js";
 import Link from "next/link";
 
 const TableComponent = () => {
@@ -16,50 +29,49 @@ const TableComponent = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [isGlobalLoading, setIsGlobalLoading] = useState(true);
   const [errors, setErrors] = useState({});
-  const [projects, setProjects] = useState([]);
-  const [projects1, setProjects1] = useState([]);
-  const [projectId, setProjectId] = useState(null); // Add this line
+  const [crewMembers, setCrewMembers] = useState([]);
+  const [crewMemberId, setCrewMemberId] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [projectManagers, setProjectManagers] = useState([]);
+  const [projects, setProjects] = useState([]);
 
   const [formData, setFormData] = useState({
-    projectId: "",
-    callSheetDate: "",
-    shootLocation: "",
+    firstName: "",
+    lastName: "",
+    rolePosition: "",
+    email: "",
+    phone: "",
     streetAddress: "",
     streetAddress2: "",
     city: "",
     state: "",
     zip: "",
-    startTime: "",
-    endTime: "",
-    parkingNotes: "",
+    projectManagerId: "",
+    projectIds: [],
   });
+
 
   const handleShowEditModal = (row) => {
     setFormData({
       id: row.id,
-      projectId: row.projectId || "",
-      callSheetDate: row.callSheetDate
-        ? new Date(row.callSheetDate).toISOString().split("T")[0] // Format as YYYY-MM-DD
-        : "",
-      shootLocation: row.shootLocation || "",
-      streetAddress: row.streetAddress || "",
-      streetAddress2: row.streetAddress2 || "",
-      city: row.city || "",
-      state: row.state || "",
-      zip: row.zip || "",
-      startTime: row.startTime
-        ? new Date(row.startTime).toISOString().split("T")[1].slice(0, 5) // Format as HH:MM
-        : "",
-      endTime: row.endTime
-        ? new Date(row.endTime).toISOString().split("T")[1].slice(0, 5) // Format as HH:MM
-        : "",
-      parkingNotes: row.parkingNotes || "",
+      firstName: row.firstName || "",
+      lastName: row.lastName || "",
+      rolePosition: row.rolePosition || "",
+      email: row.email || "",
+      phone: row.phone || "",
+      streetAddress: row.address?.streetAddress || "",
+      streetAddress2: row.address?.streetAddress2 || "",
+      city: row.address?.city || "",
+      state: row.address?.state || "",
+      zip: row.address?.zip || "",
+      projectManagerId: row.projectManager?.id || "", // Corrected
+      projectIds: row.projects?.map((p) => p.id) || [], // Corrected
     });
-
-    setProjectId(row.id);
+  
+    setCrewMemberId(row.id);
     setShowEditModal(true);
   };
+  
 
   const handleCloseEditModal = () => setShowEditModal(false);
 
@@ -70,6 +82,7 @@ const TableComponent = () => {
       [name]: value,
     }));
   };
+
   const handleBlur = (e) => {
     const { name, value } = e.target;
     validateField(name, value);
@@ -81,22 +94,11 @@ const TableComponent = () => {
     if (!value) {
       errorMsg = "This field is required";
     } else {
-      if (name === "projectNumber" && value <= 0) {
-        errorMsg = "Project number must be positive";
+      if (name === "email" && !/\S+@\S+\.\S+/.test(value)) {
+        errorMsg = "Invalid email address";
       }
-      if (
-        name === "startDate" &&
-        formData.endDate &&
-        value > formData.endDate
-      ) {
-        errorMsg = "Start date cannot be after end date";
-      }
-      if (
-        name === "endDate" &&
-        formData.startDate &&
-        value < formData.startDate
-      ) {
-        errorMsg = "End date cannot be before start date";
+      if (name === "phone" && !/^\d{3}-\d{3}-\d{4}$/.test(value)) {
+        errorMsg = "Phone number must be in the format XXX-XXX-XXXX";
       }
     }
 
@@ -109,31 +111,27 @@ const TableComponent = () => {
   const validateForm = () => {
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
-      const value = formData[key];
-      if (!value) {
+      if (!formData[key]) {
         newErrors[key] = "This field is required";
-      } else if (key === "zip" && !/^\d{5}$/.test(value)) {
-        newErrors[key] = "Zip code must be 5 digits";
       }
     });
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
+    return Object.keys(newErrors).length === 0;
   };
+
+
 
   const handleEditSubmit = async () => {
     if (!formData.id) {
-      console.error("Missing client ID");
+      console.error("Missing crew member ID");
       return;
     }
 
     try {
       setIsUpdating(true);
-      console.log("Gggg", formData);
-
-      const response = await fetch(`/api/editCallsheet`, {
-        // Ensure correct API endpoint
-        method: "PATCH",
+      const response = await fetch(`/api/editCrewMember`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -144,13 +142,13 @@ const TableComponent = () => {
 
       if (response.ok) {
         console.log("Update Successful:", result);
+        await fetchCrewMembers();
         handleCloseEditModal();
-        await fetchCallSheets();
       } else {
         console.error("Update Failed:", result.error);
       }
     } catch (error) {
-      console.error("Error updating client:", error);
+      console.error("Error updating crew member:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -165,33 +163,63 @@ const TableComponent = () => {
     }, 1000);
   }, []);
 
-  const fetchCallSheets = async () => {
+  useEffect(() => {
+    async function fetchDropdownData() {
+      try {
+        const [managerRes, projectRes] = await Promise.all([
+          fetch("/api/getProductManager"),
+          fetch("/api/getProjects"),
+        ]);
+
+        const [managerData, projectData] = await Promise.all([
+          managerRes.json(),
+          projectRes.json(),
+        ]);
+
+        setProjectManagers(managerData.data);
+        setProjects(projectData.data);
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+      }
+    }
+
+    fetchDropdownData();
+  }, []);
+
+
+
+  const fetchCrewMembers = async () => {
     try {
       setIsGlobalLoading(true);
-      const response = await fetch("/api/getCallsheet");
+      const response = await fetch("/api/getCrewMembers");
       const result = await response.json();
-      setProjects(result.data || []);
+      setCrewMembers(result.data || []);
     } catch (error) {
-      console.error("Error fetching call sheets:", error);
+      console.error("Error fetching crew members:", error);
     } finally {
       setIsGlobalLoading(false);
     }
   };
 
-  console.log("kk", projects);
-
   useEffect(() => {
-    fetchCallSheets();
+    fetchCrewMembers();
   }, []);
 
-  const filteredData = projects.filter(
+  console.log("peo",projects)
+
+  const filteredData = crewMembers.filter(
     (item) =>
-      item.shootLocation?.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.streetAddress?.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.city?.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.state?.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.zip?.toLowerCase().includes(filterText.toLowerCase())
+      item.firstName.toLowerCase().includes(filterText.toLowerCase()) ||
+      item.lastName.toLowerCase().includes(filterText.toLowerCase()) ||
+      item.email.toLowerCase().includes(filterText.toLowerCase()) ||
+      (item.phone &&
+        item.phone.toLowerCase().includes(filterText.toLowerCase())) ||
+      (item.city &&
+        item.city.toLowerCase().includes(filterText.toLowerCase())) ||
+      (item.state &&
+        item.state.toLowerCase().includes(filterText.toLowerCase()))
   );
+
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * rowsPerPage,
@@ -206,65 +234,52 @@ const TableComponent = () => {
       width: "80px",
     },
     {
-      name: "Call Sheet Date",
-      selector: (row) => new Date(row.callSheetDate).toLocaleDateString(),
+      name: "First Name",
+      selector: (row) => row.firstName,
+      sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Last Name",
+      selector: (row) => row.lastName,
+      sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Role Position",
+      selector: (row) => row.rolePosition,
       sortable: true,
       width: "200px",
     },
     {
-      name: "Shoot Location",
-      selector: (row) => row.shootLocation,
+      name: "Email",
+      selector: (row) => row.email,
       sortable: true,
-      width: "200px",
+      width: "250px",
     },
     {
-      name: "Street Address",
-      selector: (row) => row.streetAddress || "N/A",
+      name: "Phone",
+      selector: (row) => row.phone || "N/A",
       sortable: true,
-      width: "200px",
+      width: "150px",
     },
     {
       name: "City",
-      selector: (row) => row.city || "N/A",
+      selector: (row) => row.address?.city || "N/A",
       sortable: true,
-      width: "120px",
+      width: "150px",
     },
     {
       name: "State",
-      selector: (row) => row.state || "N/A",
+      selector: (row) => row.address?.state || "N/A",
       sortable: true,
       width: "100px",
     },
-
     {
-      name: "Start Time",
-      selector: (row) => new Date(row.startTime).toLocaleTimeString(),
+      name: "Project Manager",
+      selector: (row) => row.projectManager?.fullName || "N/A",
       sortable: true,
-      width: "140px",
-    },
-    {
-      name: "End Time",
-      selector: (row) => new Date(row.endTime).toLocaleTimeString(),
-      sortable: true,
-      width: "140px",
-    },
-    {
-      name: "Project Name",
-      selector: (row) => row.project.projectName,
-      sortable: true,
-      width: "180px",
-    },
-    {
-      name: "Created At",
-      selector: (row) => new Date(row.createdAt).toLocaleDateString(),
-      sortable: true,
-      width: "150px",
-    },
-    {
-      name: "Updated At",
-      selector: (row) => new Date(row.updatedAt).toLocaleDateString(),
-      sortable: true,
-      width: "150px",
+      width: "200px",
     },
     {
       name: "Actions",
@@ -277,26 +292,14 @@ const TableComponent = () => {
         </button>
       ),
       ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      width: "100px",
+      width: "120px",
     },
   ];
   
+  
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch("/api/getProjects");
-        const result = await response.json();
-        setProjects1(result.data || []);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    };
 
-    fetchProjects();
-  }, []);
+  console.log("fkkfkk",paginatedData)
 
   return (
     <>
@@ -311,14 +314,14 @@ const TableComponent = () => {
           <Row>
             <Col lg={12} md={12} xs={12}>
               <div className="border-bottom pb-4 mb-4 mt-4 ms-4 ">
-                <h3 className="mb-0 fw-bold">Call Sheet</h3>
+                <h3 className="mb-0 fw-bold">Crew Members</h3>
               </div>
             </Col>
           </Row>
 
           <div className="d-flex justify-content-end me-2">
-            <Link href="/callsheet/addCallsheet">
-              <Button variant="primary">Add CallSheet</Button>
+            <Link href="/crewMember/addCrewMember">
+              <Button variant="primary">Add Crew</Button>
             </Link>
           </div>
 
@@ -331,7 +334,7 @@ const TableComponent = () => {
               height="300"
               containerStyle={{ flex: "0 0 100%" }}
               containerClassname="p-3 bg-white rounded shadow"
-              title="Client Count by Contact Person"
+              title="Crew Member Count by Role"
             />
           </div>
 
@@ -355,92 +358,92 @@ const TableComponent = () => {
           </Row>
 
           {/* Edit Modal */}
-          <Modal show={showEditModal} onHide={handleCloseEditModal}>
+          <Modal
+            show={showEditModal}
+            onHide={handleCloseEditModal}
+            centered
+            size="lg"
+          >
             <Modal.Header closeButton>
-              <Modal.Title>Edit Call Sheet</Modal.Title>
+              <Modal.Title>Edit Crew Member</Modal.Title>
             </Modal.Header>
+
             <Modal.Body>
               <Form>
                 <Row className="mb-3">
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Project</Form.Label>
+                      <Form.Label>First Name</Form.Label>
                       <Form.Control
-                        as="select"
-                        name="projectId"
-                        value={formData.projectId}
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        isInvalid={!!errors.projectId}
-                        disabled={projects1.length === 0}
-                      >
-                        <option value="">Select a project</option>
-                        {projects1.map((project) => (
-                          <option key={project.id} value={project.id}>
-                            {project.projectName}
-                          </option>
-                        ))}
-                      </Form.Control>
+                        isInvalid={!!errors.firstName}
+                      />
                       <Form.Control.Feedback type="invalid">
-                        {errors.projectId}
+                        {errors.firstName}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Shoot Location</Form.Label>
+                      <Form.Label>Last Name</Form.Label>
                       <Form.Control
                         type="text"
-                        name="shootLocation"
-                        value={formData.shootLocation}
+                        name="lastName"
+                        value={formData.lastName}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        isInvalid={!!errors.shootLocation}
+                        isInvalid={!!errors.lastName}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.shootLocation}
+                        {errors.lastName}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
                 </Row>
 
                 <Row className="mb-3">
-                  <Col md={6}>
+                <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Street Address</Form.Label>
+                      <Form.Label>Phone</Form.Label>
                       <Form.Control
                         type="text"
-                        name="streetAddress"
-                        value={formData.streetAddress}
+                        name="phone"
+                        value={formData.phone}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        isInvalid={!!errors.streetAddress}
+                        isInvalid={!!errors.phone}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.streetAddress}
+                        {errors.phone}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Street Address 2</Form.Label>
+                      <Form.Label>Email</Form.Label>
                       <Form.Control
-                        type="text"
-                        name="streetAddress2"
-                        value={formData.streetAddress2}
+                        type="email"
+                        name="email"
+                        value={formData.email}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        isInvalid={!!errors.streetAddress2}
+                        isInvalid={!!errors.email}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.streetAddress2}
+                        {errors.email}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
                 </Row>
 
+
                 <Row className="mb-3">
-                  <Col md={4}>
+               
+                  <Col md={6}>
                     <Form.Group>
                       <Form.Label>City</Form.Label>
                       <Form.Control
@@ -456,7 +459,7 @@ const TableComponent = () => {
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                  <Col md={6}>
                     <Form.Group>
                       <Form.Label>State</Form.Label>
                       <Form.Control
@@ -472,106 +475,61 @@ const TableComponent = () => {
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
+                </Row>
+
+
+
+                <Row className="mb-3">
+            
+                  <Col md={6}>
                     <Form.Group>
-                      <Form.Label>ZIP Code</Form.Label>
+                      <Form.Label>Role Position</Form.Label>
                       <Form.Control
                         type="text"
-                        name="zip"
-                        value={formData.zip}
+                        name="rolePosition"
+                        value={formData.rolePosition}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        isInvalid={!!errors.zip}
+                        isInvalid={!!errors.rolePosition}
                       />
                       <Form.Control.Feedback type="invalid">
-                        {errors.zip}
+                        {errors.rolePosition}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                </Row>
-
-                <Row className="mb-3">
                 <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Parking Notes</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="parkingNotes"
-                        value={formData.parkingNotes}
+                      <Form.Label>Project Manager</Form.Label>
+                      <Form.Select
+                        name="projectManagerId"
+                        value={formData.projectManagerId}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        isInvalid={!!errors.parkingNotes}
-                      />
+                        isInvalid={!!errors.projectManagerId}
+                      >
+                        <option value="">Select Project Manager</option>
+                        {projectManagers.map((manager) => (
+                          <option key={manager.id} value={manager.id}>
+                            {manager.fullName}
+                          </option>
+                        ))}
+                      </Form.Select>
                       <Form.Control.Feedback type="invalid">
-                        {errors.parkingNotes}
+                        {errors.projectManagerId}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Call Sheet Date</Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="callSheetDate"
-                        value={formData.callSheetDate}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        isInvalid={!!errors.callSheetDate}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.callSheetDate}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                  
-                </Row>
 
-                <Row className="mb-3">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Start Time</Form.Label>
-                      <Form.Control
-                        type="time"
-                        name="startTime"
-                        value={formData.startTime}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        isInvalid={!!errors.startTime}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.startTime}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>End Time</Form.Label>
-                      <Form.Control
-                        type="time"
-                        name="endTime"
-                        value={formData.endTime}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        isInvalid={!!errors.endTime}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.endTime}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
                 </Row>
               </Form>
             </Modal.Body>
+
             <Modal.Footer>
               <Button variant="secondary" onClick={handleCloseEditModal}>
-                Close
+                Cancel
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleEditSubmit}
-                disabled={isUpdating}
-              >
-                {isUpdating ? "Saving..." : "Save Changes"}
+              <Button variant="primary" onClick={handleEditSubmit}>
+                Save Changes
               </Button>
             </Modal.Footer>
           </Modal>

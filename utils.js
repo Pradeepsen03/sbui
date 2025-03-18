@@ -853,9 +853,9 @@ export const budgetChartOptions = {
 
 export const statusBadge = (status) => {
   const color =
-    status === "completed"
+    status === "COMPLETED"
       ? "success"
-      : status === "IN_PROGRESS"
+      : status === "IN PROGRESS"
       ? "warning"
       : status === "PENDING" && "danger";
   return <Badge bg={color}>{status}</Badge>;

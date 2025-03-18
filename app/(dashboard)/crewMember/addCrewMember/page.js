@@ -1,42 +1,42 @@
 "use client";
+// pages/addCrewMember.js
+import React, { useEffect, useState } from "react";
 import { Form, Row, Col, Button, Container } from "react-bootstrap";
-import React, { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BsArrowLeft } from "react-icons/bs";
-const AddClientPage = () => {
+
+const AddCrewMemberPage = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    rolePosition: "",
     email: "",
     phone: "",
-    address1: "",
-    address2: "",
+    streetAddress: "",
+    streetAddress2: "",
     city: "",
     state: "",
     zip: "",
-    contactFirstName: "",
-    contactLastName: "",
-    note: "",
+    projectManagerId: "",
+    projectIds: [],
   });
-
+  const [projects, setProjects] = useState([]);
+  const [projectManagers, setProjectManagers] = useState([]);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [projectManagers, setProjectManagers] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const router = useRouter();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
     validateField(name, value);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear the error for the field when the user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
   };
 
   const validateField = (name, value) => {
@@ -44,39 +44,40 @@ const AddClientPage = () => {
 
     if (!value) {
       errorMsg = "This field is required";
-    } else if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      errorMsg = "Invalid email address";
-    } else if (name === "phone" && !/^\d{10}$/.test(value)) {
-      errorMsg = "Phone number must be 10 digits";
-    } else if (name === "zip" && !/^\d{5}$/.test(value)) {
-      errorMsg = "Zip code must be 5 digits";
+    } else {
+      if (name === "email" && !/\S+@\S+\.\S+/.test(value)) {
+        errorMsg = "Invalid email address";
+      }
+      if (name === "phone" && !/^\d{10}$/.test(value)) {
+        errorMsg = "Phone number must be exactly 10 digits long";
+      }
     }
 
-    setErrors((prev) => ({ ...prev, [name]: errorMsg }));
+    setErrors((prev) => ({
+      ...prev,
+      [name]: errorMsg,
+    }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate all fields
     Object.keys(formData).forEach((key) => {
-      validateField(key, formData[key]);
+      if (!formData[key]) {
+        newErrors[key] = "This field is required";
+      }
     });
 
-    // Check if there are any errors
-    const hasErrors = Object.values(newErrors).some((error) => error);
     setErrors(newErrors);
-    return !hasErrors; // Return true if no errors
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    console.log("Submitting client:", formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        const res = await fetch("/api/createClient", {
+        const res = await fetch("/api/createCrewmember", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
@@ -85,18 +86,18 @@ const AddClientPage = () => {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error || "Client creation failed");
+          throw new Error(data.error || "Crew member creation failed");
         }
-        router.push("/client"); // Redirect to the client list page
+
+        // Redirect to the crew members list page after successful creation
+        router.push("/crewMember");
       } catch (err) {
         console.error(err.message);
-        setErrors((prev) => ({ ...prev, submitError: err.message }));
       } finally {
         setIsSubmitting(false);
       }
     }
   };
-
   useEffect(() => {
     async function fetchDropdownData() {
       try {
@@ -120,20 +121,20 @@ const AddClientPage = () => {
     fetchDropdownData();
   }, []);
 
+  console.log("maaa", projectManagers);
   return (
-    <Container className="mt-4 mb-2">
-         <div className="d-flex align-items-center mb-4 ms-3">
+    <Container>
+         <div className="d-flex align-items-center mb-4 ms-3 mt-5">
         <button
           className="border-0 bg-transparent p-0 d-flex align-items-center"
           onClick={() => window.history.back()}
         >
           <BsArrowLeft className="me-0 fw-bold" size={24} />
         </button>
-        <h3 className="ms-3 mb-0">Add New Client</h3>
+        <h3 className="ms-3 mb-0">Add Crew Member</h3>
       </div>
 
-      <Form onSubmit={handleSubmit} className="ms-3 me-3">
-        {/* Client Information */}
+      <Form onSubmit={handleSubmit} className="mx-4  ">
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
@@ -145,6 +146,7 @@ const AddClientPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.firstName}
+                 placeholder="Enter first name"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.firstName}
@@ -161,6 +163,7 @@ const AddClientPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.lastName}
+                placeholder="Enter last name"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.lastName}
@@ -172,6 +175,29 @@ const AddClientPage = () => {
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
+              <Form.Label>Role Position</Form.Label>
+              <Form.Select
+                name="rolePosition"
+                value={formData.rolePosition}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                isInvalid={!!errors.rolePosition}
+              >
+                <option value="">Select Role Position</option>
+                <option value="Camera Operator">Camera Operator</option>
+                <option value="Director">Director</option>
+                <option value="Producer">Producer</option>
+                <option value="Sound Engineer">Sound Engineer</option>
+                <option value="Lighting Technician">Lighting Technician</option>
+                <option value="Editor">Editor</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors.rolePosition}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
@@ -180,12 +206,16 @@ const AddClientPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.email}
+                placeholder="Enter xyz@email "
               />
               <Form.Control.Feedback type="invalid">
                 {errors.email}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
+        </Row>
+
+        <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
               <Form.Label>Phone</Form.Label>
@@ -196,51 +226,51 @@ const AddClientPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.phone}
+                placeholder="1234567890"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.phone}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
-        </Row>
-
-        <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
               <Form.Label>Street Address</Form.Label>
               <Form.Control
                 type="text"
-                name="address1"
-                value={formData.address1}
+                name="streetAddress"
+                value={formData.streetAddress}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                isInvalid={!!errors.address1}
+                isInvalid={!!errors.streetAddress}
+                 placeholder="Enter address"
               />
               <Form.Control.Feedback type="invalid">
-                {errors.address1}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group>
-              <Form.Label>Street Address 2</Form.Label>
-              <Form.Control
-                type="text"
-                name="address2"
-                value={formData.address2}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                isInvalid={!!errors.address2}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.address2}
+                {errors.streetAddress}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
         </Row>
 
         <Row className="mb-3">
-          <Col md={4}>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Street Address 2</Form.Label>
+              <Form.Control
+                type="text"
+                name="streetAddress2"
+                value={formData.streetAddress2}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                isInvalid={!!errors.streetAddress2}
+                 placeholder="Enter address"
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.streetAddress2}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
             <Form.Group>
               <Form.Label>City</Form.Label>
               <Form.Control
@@ -250,13 +280,17 @@ const AddClientPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.city}
+                placeholder="Enter city name"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.city}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
-          <Col md={4}>
+        </Row>
+
+        <Row className="mb-3">
+          <Col md={6}>
             <Form.Group>
               <Form.Label>State</Form.Label>
               <Form.Control
@@ -266,15 +300,16 @@ const AddClientPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.state}
+                placeholder="Enter State name"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.state}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
-          <Col md={4}>
+          <Col md={6}>
             <Form.Group>
-              <Form.Label>Zip</Form.Label>
+              <Form.Label>ZIP Code</Form.Label>
               <Form.Control
                 type="text"
                 name="zip"
@@ -282,6 +317,7 @@ const AddClientPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.zip}
+                 placeholder="Enter ZIP code"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.zip}
@@ -290,78 +326,64 @@ const AddClientPage = () => {
           </Col>
         </Row>
 
-        {/* Contact Person */}
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Contact Person First </Form.Label>
-              <Form.Control
-                type="text"
-                name="contactFirstName"
-                value={formData.contactFirstName}
+              <Form.Label>Project Manager</Form.Label>
+              <Form.Select
+                name="projectManagerId"
+                value={formData.projectManagerId}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                isInvalid={!!errors.contactFirstName}
-              />
+                isInvalid={!!errors.projectManagerId}
+              >
+                <option value="">Select Project Manager</option>
+                {projectManagers.map((manager) => (
+                  <option key={manager.id} value={manager.id}>
+                    {manager.fullName}
+                  </option>
+                ))}
+              </Form.Select>
               <Form.Control.Feedback type="invalid">
-                {errors.contactFirstName}
+                {errors.projectManagerId}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
           <Col md={6}>
             <Form.Group>
-              <Form.Label>Contact Person Last </Form.Label>
-              <Form.Control
-                type="text"
-                name="contactLastName"
-                value={formData.contactLastName}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                isInvalid={!!errors.contactLastName}
-              />
+              <Form.Label>Projects</Form.Label>
+              <Form.Select
+                name="projectId"
+                value={formData.projectId} // Single value, not an array
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    projectId: e.target.value, // Store only one selected value
+                  })
+                }
+                isInvalid={!!errors.projectId}
+              >
+                <option value="">Select a Project</option>{" "}
+                {/* Default option */}
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.projectName}
+                  </option>
+                ))}
+              </Form.Select>
               <Form.Control.Feedback type="invalid">
-                {errors.contactLastName}
+                {errors.projectId}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
         </Row>
 
-        {/* Notepad-like Note Input */}
-        <Form.Group className="mb-3">
-          <Form.Label>Note</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            name="note"
-            value={formData.note}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            isInvalid={!!errors.note}
-          />
-          <Form.Control.Feedback type="invalid">
-            {errors.note}
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        {/* Submit Button */}
-        <div className="text-right mt-4 text-lg">
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isSubmitting}
-            className="px-8 py-2 text-xl"
-          >
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </Button>
-        </div>
-
-        {/* Display API errors */}
-        {errors.submitError && (
-          <div className="text-danger mt-2">{errors.submitError}</div>
-        )}
+        <Button variant="primary" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save Changes"}
+        </Button>
       </Form>
     </Container>
   );
 };
 
-export default AddClientPage;
+export default AddCrewMemberPage;

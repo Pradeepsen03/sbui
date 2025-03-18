@@ -44,6 +44,7 @@ model ProjectManagers {
   phone     String?
 
   projects ProjectManagerProjects[]
+  crewMembers CrewMembers[] // Relation to CrewMembers
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -82,6 +83,7 @@ model Projects {
   clients             ClientProjects[]
   projectManagers     ProjectManagerProjects[]
   callSheets          CallSheets[]
+  crewMembers         ProjectCrewMembers[] // Many-to-Many relationship with CrewMembers
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -132,4 +134,36 @@ model CallSheets {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+model CrewMembers {
+  id             Int     @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  rolePosition   String
+  email          String  @unique
+  phone          String?
+  streetAddress  String?
+  streetAddress2 String?
+  city           String?
+  state          String?
+  zip            String?
+
+  projectManagerId Int?
+  projectManager   ProjectManagers? @relation(fields: [projectManagerId], references: [id])
+
+  projects ProjectCrewMembers[] // Many-to-Many relationship with Projects
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectCrewMembers {
+  projectId   Int
+  crewMemberId Int
+  project     Projects    @relation(fields: [projectId], references: [id])
+  crewMember  CrewMembers @relation(fields: [crewMemberId], references: [id])
+
+  @@id([projectId, crewMemberId])
 }

@@ -78,7 +78,7 @@ const Projects = () => {
                     series={stockCount}
                     width="100%"
                     height="100%"
-                    containerStyle={{ flex: "0 0 36%" }}
+                    containerStyle={{ flex: "0 0 37%" }}
                     containerClassname="p-3 bg-white rounded shadow"
                     title="Project by Status"
                   />
@@ -88,7 +88,7 @@ const Projects = () => {
                     options={budgetChartOptions}
                     series={budgetChartData}
                     width="100%"
-                    height="250"
+                    height="280"
                     containerStyle={{ flex: "0 0 60%" }}
                     containerClassname="p-3 bg-white rounded shadow"
                     title="Budget Distribution"

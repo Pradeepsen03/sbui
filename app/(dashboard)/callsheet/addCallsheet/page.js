@@ -2,6 +2,7 @@
 import { Form, Row, Col, Button, Container } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BsArrowLeft } from "react-icons/bs";
 
 const AddCallSheetPage = () => {
   const [formData, setFormData] = useState({
@@ -105,7 +106,15 @@ const AddCallSheetPage = () => {
 
   return (
     <Container className="mt-4 mb-2">
-      <h3 className="text-left ms-2 mb-4">Add New Call Sheet</h3>
+         <div className="d-flex align-items-center mb-4 ms-3">
+        <button
+          className="border-0 bg-transparent p-0 d-flex align-items-center"
+          onClick={() => window.history.back()}
+        >
+          <BsArrowLeft className="me-0 fw-bold" size={24} />
+        </button>
+        <h3 className="ms-3 mb-0">Add New Call Sheet</h3>
+      </div>
       <Form onSubmit={handleSubmit} className="ms-3 me-3">
         <Row className="mb-3">
           <Col md={6}>

@@ -29,32 +29,32 @@ export const DashboardMenu = [
 	},
 	{
 		id: uuid(),
-		title: 'Project',
+		title: 'Projects',
 		icon: 'layout',
 		link: '/projects',
 		role: [ "ADMIN"]
 	},
 	{
 		id: uuid(),
-		title: 'Client',
+		title: 'Clients',
 		icon: 'layout',
 		link: '/client',
 		role: [ "ADMIN"]
 	},
 	{
 		id: uuid(),
-		title: 'CallSheet',
+		title: 'CallSheets',
 		icon: 'layout',
 		link: '/callsheet',
 		role: [ "ADMIN"]
 	},	
 	{
 		id: uuid(),
-		title: 'Layouts',
+		title: 'Crew Members',
 		icon: 'layout',
-		link: '/layout-vertical',
-		role: [ "USER"]
-	},	
+		link: '/crewMember',
+		role: [ "ADMIN"]
+	}	
 
 ];
 

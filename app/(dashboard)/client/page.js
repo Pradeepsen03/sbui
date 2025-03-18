@@ -282,68 +282,74 @@ const TableComponent = () => {
       name: "ID",
       selector: (row) => row.id,
       sortable: true,
+      width: "80px",
     },
     {
       name: "First Name",
       selector: (row) => row.firstName,
       sortable: true,
+      width: "130px",
     },
     {
       name: "Last Name",
       selector: (row) => row.lastName,
       sortable: true,
+      width: "130px",
     },
     {
       name: "Email",
       selector: (row) => row.email,
       sortable: true,
+      width: "200px",
     },
     {
       name: "Phone",
       selector: (row) => row.phone || "N/A",
       sortable: true,
+      width: "150px",
     },
     {
       name: "Street Address",
       selector: (row) => row.streetAddress || "N/A",
       sortable: true,
+      width: "200px",
     },
-    {
-      name: "Street Address 2",
-      selector: (row) => row.streetAddress2 || "N/A",
-      sortable: true,
-    },
+
     {
       name: "City",
       selector: (row) => row.city || "N/A",
       sortable: true,
+      width: "120px",
     },
     {
       name: "State",
       selector: (row) => row.state || "N/A",
       sortable: true,
+      width: "100px",
     },
     {
       name: "ZIP Code",
       selector: (row) => row.zip || "N/A",
       sortable: true,
+      width: "140px",
     },
     {
       name: "Contact Person",
       selector: (row) =>
-        `${row.contactPersonFirst || "N/A"} ${
-          row.contactPersonLast || ""
-        }`.trim(),
+        `${row.contactPersonFirst || "N/A"} ${row.contactPersonLast || ""}`.trim(),
       sortable: true,
+      width: "180px",
     },
     {
       name: "Note",
       selector: (row) => row.note || "N/A",
+      width: "250px",
     },
     {
       name: "Created At",
       selector: (row) => new Date(row.createdAt).toLocaleDateString(),
       sortable: true,
+      width: "150px",
     },
     {
       name: "Actions",
@@ -358,8 +364,10 @@ const TableComponent = () => {
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
+      width: "100px",
     },
   ];
+  
 
   return (
     <>
@@ -374,7 +382,7 @@ const TableComponent = () => {
           <Row>
             <Col lg={12} md={12} xs={12}>
               <div className="border-bottom pb-4 mb-4 mt-4 ms-4 ">
-                <h3 className="mb-0 fw-bold">Projects</h3>
+                <h3 className="mb-0 fw-bold">Clients</h3>
               </div>
             </Col>
           </Row>
