@@ -32,7 +32,7 @@ export async function middleware(request) {
         // Redirect users if they don't have admin access but try to visit admin pages
         if (adminRoutes.includes(request.nextUrl.pathname) && payload.role !== "ADMIN") {
             console.log("⛔ Unauthorized access. Redirecting...");
-            return NextResponse.redirect(new URL("/layout-vertical", request.url)); // Redirect to home or another allowed page
+            return NextResponse.redirect(new URL("/vdashboard", request.url)); // Redirect to home or another allowed page
         }
     } catch (error) {
         console.log("❌ JWT Verification Error:", error.message);
