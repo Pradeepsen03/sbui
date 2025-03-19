@@ -26,6 +26,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@next/env": "^15.2.3",
     "@prisma/client": "^6.4.1",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
@@ -33,6 +34,7 @@
     "apexcharts": "^4.5.0",
     "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.1",
+    "dotenv": "^16.4.7",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "jose": "^6.0.8",

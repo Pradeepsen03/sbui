@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:root@123@localhost:5432/dashUi?schema=public"
+  url      = env("DATABASE_URL")
 }
 
 model Users {

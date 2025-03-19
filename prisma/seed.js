@@ -14,51 +14,58 @@ async function main() {
     data: [
       {
         name: 'John Doe',
-        email: 'john@example.com',
+        email: 'john1@example.com',
         password: hashedPassword,
         role: 'ADMIN',
       },
       {
         name: 'Jane Smith',
-        email: 'jane@example.com',
+        email: 'jane1@example.com',
         password: hashedPassword,
         role: 'ACC',
       },
       {
         name: 'David Miller',
-        email: 'david@example.com',
+        email: 'david1@example.com',
         password: hashedPassword,
         role: 'USER',
       },
+      {
+        name: 'ps',
+        email: 'ps@example.com',
+        password: hashedPassword,
+        role: 'ADMIN',
+      }
     ],
     skipDuplicates: true,
   });
 
   // Seed Production Companies
-  const productionCompany1 = await prisma.productionCompanies.create({
-    data: {
-      name: 'ABC Productions',
-      website: 'https://abcproductions.com',
-      email: 'contact@abcproductions.com',
-      phone: '123-456-7890',
-    },
+  await prisma.productionCompanies.createMany({
+    data: [
+      {
+        name: 'ABC Productions1',
+        website: 'https://abcproductions.com',
+        email: 'contact@abcproductions.com',
+        phone: '123-456-7890',
+      },
+      {
+        name: 'XYZ Studios1',
+        website: 'https://xyzstudios.com',
+        email: 'info@xyzstudios.com',
+        phone: '987-654-3210',
+      },
+    ],
+    skipDuplicates: true, // ✅ This prevents errors due to duplicate entries
   });
-
-  const productionCompany2 = await prisma.productionCompanies.create({
-    data: {
-      name: 'XYZ Studios',
-      website: 'https://xyzstudios.com',
-      email: 'info@xyzstudios.com',
-      phone: '987-654-3210',
-    },
-  });
+  
 
   // Seed Project Managers
   const projectManager1 = await prisma.projectManagers.create({
     data: {
       firstName: 'Alice',
       lastName: 'Johnson',
-      email: 'alice.manager@example.com',
+      email: 'alice.manager1@example.com',
       phone: '111-222-3333',
     },
   });
@@ -67,7 +74,7 @@ async function main() {
     data: {
       firstName: 'Bob',
       lastName: 'Williams',
-      email: 'bob.manager@example.com',
+      email: 'bob.manager1@example.com',
       phone: '444-555-6666',
     },
   });
@@ -77,7 +84,7 @@ async function main() {
     data: {
       firstName: 'Michael',
       lastName: 'Scott',
-      email: 'michael@dundermifflin.com',
+      email: 'michael1@dundermifflin.com',
       phone: '555-123-4567',
       streetAddress: '123 Paper St',
       city: 'Scranton',
@@ -93,7 +100,7 @@ async function main() {
     data: {
       firstName: 'Rachel',
       lastName: 'Green',
-      email: 'rachel@fashionworld.com',
+      email: 'rachel1@fashionworld.com',
       phone: '555-987-6543',
       streetAddress: '456 Fashion Ave',
       city: 'New York',
@@ -108,7 +115,7 @@ async function main() {
   // Seed Projects
   const project1 = await prisma.projects.create({
     data: {
-      projectName: 'Film Production A',
+      projectName: 'Film Production A1',
       startDate: new Date('2024-03-01'),
       endDate: new Date('2024-06-30'),
       status: 'IN_PROGRESS',
@@ -117,7 +124,7 @@ async function main() {
 
   const project2 = await prisma.projects.create({
     data: {
-      projectName: 'Music Video B',
+      projectName: 'Music Video B1',
       startDate: new Date('2024-04-15'),
       endDate: new Date('2024-07-20'),
       status: 'PENDING',

@@ -124,7 +124,7 @@ const AddCrewMemberPage = () => {
   console.log("maaa", projectManagers);
   return (
     <Container>
-         <div className="d-flex align-items-center mb-4 ms-3 mt-5">
+      <div className="d-flex align-items-center mb-4 ms-3 mt-5">
         <button
           className="border-0 bg-transparent p-0 d-flex align-items-center"
           onClick={() => window.history.back()}
@@ -146,7 +146,7 @@ const AddCrewMemberPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.firstName}
-                 placeholder="Enter first name"
+                placeholder="Enter first name"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.firstName}
@@ -243,7 +243,7 @@ const AddCrewMemberPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.streetAddress}
-                 placeholder="Enter address"
+                placeholder="Enter address"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.streetAddress}
@@ -263,7 +263,7 @@ const AddCrewMemberPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.streetAddress2}
-                 placeholder="Enter address"
+                placeholder="Enter address"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.streetAddress2}
@@ -317,7 +317,7 @@ const AddCrewMemberPage = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 isInvalid={!!errors.zip}
-                 placeholder="Enter ZIP code"
+                placeholder="Enter ZIP code"
               />
               <Form.Control.Feedback type="invalid">
                 {errors.zip}
