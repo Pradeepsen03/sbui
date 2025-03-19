@@ -17,6 +17,7 @@ import {
   EquipmentChartOptions,
   CallProjectChartOptions,
   callProjectChartData,
+  getCrewChartOptions,
 } from "../../../utils";
 import "../../../styles/dataTable.css";
 import { MdOutlineEdit } from "react-icons/md";
@@ -34,7 +35,7 @@ const TableComponent = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [projectManagers, setProjectManagers] = useState([]);
   const [projects, setProjects] = useState([]);
-
+  const [crewChartData,setcrewChartData]=useState([])
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -49,7 +50,6 @@ const TableComponent = () => {
     projectManagerId: "",
     projectIds: [],
   });
-
 
   const handleShowEditModal = (row) => {
     setFormData({
@@ -67,11 +67,10 @@ const TableComponent = () => {
       projectManagerId: row.projectManager?.id || "", // Corrected
       projectIds: row.projects?.map((p) => p.id) || [], // Corrected
     });
-  
+
     setCrewMemberId(row.id);
     setShowEditModal(true);
   };
-  
 
   const handleCloseEditModal = () => setShowEditModal(false);
 
@@ -120,8 +119,6 @@ const TableComponent = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
-
   const handleEditSubmit = async () => {
     if (!formData.id) {
       console.error("Missing crew member ID");
@@ -156,12 +153,6 @@ const TableComponent = () => {
 
   const rowsPerPage = 5;
 
-  useEffect(() => {
-    // Simulating data fetch
-    setTimeout(() => {
-      setIsGlobalLoading(false);
-    }, 1000);
-  }, []);
 
   useEffect(() => {
     async function fetchDropdownData() {
@@ -186,14 +177,38 @@ const TableComponent = () => {
     fetchDropdownData();
   }, []);
 
+  const transformCrewMemberData = (apiData) => {
+    const roleCounts = {};
 
+    // Iterate through the API data
+    apiData.forEach((member) => {
+      const role = member.rolePosition;
 
+      // If the role already exists in the object, increment the count
+      if (roleCounts[role]) {
+        roleCounts[role]++;
+      } else {
+        // Otherwise, initialize the count to 1
+        roleCounts[role] = 1;
+      }
+    });
+
+    // Convert the object into an array of { role, count } objects
+    const transformedData = Object.keys(roleCounts).map((role) => ({
+      role,
+      count: roleCounts[role],
+    }));
+    setcrewChartData(transformedData)
+    return transformedData;
+  };
   const fetchCrewMembers = async () => {
     try {
       setIsGlobalLoading(true);
       const response = await fetch("/api/getCrewMembers");
       const result = await response.json();
+      console.log(result.data);
       setCrewMembers(result.data || []);
+      transformCrewMemberData(result.data);
     } catch (error) {
       console.error("Error fetching crew members:", error);
     } finally {
@@ -205,7 +220,7 @@ const TableComponent = () => {
     fetchCrewMembers();
   }, []);
 
-  console.log("peo",projects)
+  console.log("peo", projects);
 
   const filteredData = crewMembers.filter(
     (item) =>
@@ -295,11 +310,8 @@ const TableComponent = () => {
       width: "120px",
     },
   ];
-  
-  
 
-
-  console.log("fkkfkk",paginatedData)
+  console.log("fkkfkk", paginatedData);
 
   return (
     <>
@@ -319,17 +331,11 @@ const TableComponent = () => {
             </Col>
           </Row>
 
-          <div className="d-flex justify-content-end me-2">
-            <Link href="/crewMember/addCrewMember">
-              <Button variant="primary">Add Crew</Button>
-            </Link>
-          </div>
-
           <div className="d-flex justify-content-center flex-wrap mt-5 gap-3 mb-8 ms-4 me-4">
             <ChartsComponent
               type="bar"
-              options={ClientChartOptions}
-              series={[{ data: clientChartData }]}
+              options={getCrewChartOptions(crewChartData)} // Dynamic options
+              series={[{ data: crewChartData.map((item) => item.count) }]}
               width="100%"
               height="300"
               containerStyle={{ flex: "0 0 100%" }}
@@ -338,11 +344,13 @@ const TableComponent = () => {
             />
           </div>
 
-          <Row className="mt-5 ms-2 me-2">
+          <Row className="mt-5 ms-3 me-4 g-0">
             <SearchExportComponent
               filterText={filterText}
               setFilterText={setFilterText}
               data={filteredData}
+              link="/crewMember/addCrewMember"
+              buttonText="Add Crew"
             />
             <DataTableComponent
               paginatedData={paginatedData}
@@ -406,7 +414,7 @@ const TableComponent = () => {
                 </Row>
 
                 <Row className="mb-3">
-                <Col md={6}>
+                  <Col md={6}>
                     <Form.Group>
                       <Form.Label>Phone</Form.Label>
                       <Form.Control
@@ -440,9 +448,7 @@ const TableComponent = () => {
                   </Col>
                 </Row>
 
-
                 <Row className="mb-3">
-               
                   <Col md={6}>
                     <Form.Group>
                       <Form.Label>City</Form.Label>
@@ -477,10 +483,7 @@ const TableComponent = () => {
                   </Col>
                 </Row>
 
-
-
                 <Row className="mb-3">
-            
                   <Col md={6}>
                     <Form.Group>
                       <Form.Label>Role Position</Form.Label>
@@ -497,7 +500,7 @@ const TableComponent = () => {
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                <Col md={6}>
+                  <Col md={6}>
                     <Form.Group>
                       <Form.Label>Project Manager</Form.Label>
                       <Form.Select
@@ -519,7 +522,6 @@ const TableComponent = () => {
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-
                 </Row>
               </Form>
             </Modal.Body>

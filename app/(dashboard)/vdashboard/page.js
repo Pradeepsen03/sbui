@@ -48,7 +48,7 @@ const Projects = () => {
     // Simulating data fetch
     setTimeout(() => {
       setIsGlobalLoading(false); // Set loading to false once data is ready
-    }, 1000);
+    }, 2000);
   }, []);
 
   return (
@@ -100,7 +100,7 @@ const Projects = () => {
                     series={[{ data: clientChartData }]}
                     width="100%"
                     height="250"
-                    containerStyle={{ flex: "0 0 36%" }}
+                    containerStyle={{ flex: "0 0 37%" }}
                     containerClassname="p-3 bg-white rounded shadow"
                     title="Client Count by Contact Person"
                   />
@@ -122,7 +122,7 @@ const Projects = () => {
                     series={[{ data: callProjectChartData }]}
                     width="100%"
                     height="250"
-                    containerStyle={{ flex: "0 0 97%" }}
+                    containerStyle={{ flex: "0 0 98%" }}
                     containerClassname="p-3 bg-white rounded shadow ms-4 me-4"
                     title="Call per Project "
                   />

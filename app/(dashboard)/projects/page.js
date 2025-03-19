@@ -237,6 +237,7 @@ const TableComponent = () => {
       const response = await fetch("/api/getProjects");
       const result = await response.json();
       setProjects(result.data || []);
+      console.log("p",result.data)
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
@@ -333,7 +334,6 @@ const TableComponent = () => {
       button: true,
     },
   ];
-  
 
   return (
     <>
@@ -353,16 +353,6 @@ const TableComponent = () => {
             </Col>
           </Row>
 
-          <div className="d-flex justify-content-end me-2">
-            <Link href="/projects/addProject">
-              <Button
-                variant="primary"
-                onClick={() => router.push("/projects/addProject")}
-              >
-                Add Project
-              </Button>
-            </Link>
-          </div>
 
           <div className="d-flex justify-content-center flex-wrap mt-5 gap-3 mb-5">
             <ChartsComponent
@@ -389,11 +379,13 @@ const TableComponent = () => {
             />
           </div>
 
-          <Row className="mt-5 ms-2 me-2">
+          <Row className="mt-5 ms-3 me-4 g-0">
             <SearchExportComponent
               filterText={filterText}
               setFilterText={setFilterText}
               data={filteredData}
+              link="/projects/addProject"
+              buttonText="Add Project"
             />
             <DataTableComponent
               paginatedData={paginatedData}
@@ -481,7 +473,7 @@ const TableComponent = () => {
                 </Row>
 
                 <Row className="mb-3">
-                <Col md={6}>
+                  <Col md={6}>
                     <Form.Group>
                       <Form.Label>Start Date</Form.Label>
                       <Form.Control
@@ -504,7 +496,6 @@ const TableComponent = () => {
                       />
                     </Form.Group>
                   </Col>
-            
                 </Row>
 
                 <Row className="mb-3">

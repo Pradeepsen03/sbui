@@ -17,7 +17,7 @@ const SignUp = () => {
           {/* Card body */}
           <Card.Body className="p-6">
             <div className="mb-4">
-              <Link href="/"><Image src="/images/brand/logo/logo-primary.svg" className="mb-2" alt="" /></Link>
+              <Link href="/">  <h1 className="text-black fs-3 fw-bold">SB UI</h1></Link>
               <p className="mb-6">Please enter your user information.</p>
             </div>
             {/* Form */}

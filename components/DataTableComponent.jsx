@@ -4,9 +4,12 @@ import { MdOutlineEdit } from "react-icons/md"; // Import the edit icon
 import { statusBadge } from "../utils";
 import "/styles/dataTable.css";
 
-const DataTableComponent = ({ paginatedData, isLoading, handleShowEditModal,columns }) => {
-
-
+const DataTableComponent = ({
+  paginatedData,
+  isLoading,
+  handleShowEditModal,
+  columns,
+}) => {
   return (
     <DataTable
       columns={columns}
@@ -18,4 +21,4 @@ const DataTableComponent = ({ paginatedData, isLoading, handleShowEditModal,colu
   );
 };
 
-export default DataTableComponent; 
+export default DataTableComponent;

@@ -5,7 +5,7 @@ import DataTableComponent from "../../../components/DataTableComponent";
 import PaginationComponent from "../../../components/PaginateComponente";
 import ChartsComponent from "../../../components/ChartsComponent";
 import SearchExportComponent from "../../../components/SearchExportComponent";
-import { ClientChartOptions, clientChartData } from "../../../utils";
+import { ClientChartOptions, clientChartData, getCallSheetChartOptions } from "../../../utils";
 import "../../../styles/dataTable.css";
 import { MdOutlineEdit } from "react-icons/md";
 import Link from "next/link";
@@ -20,7 +20,7 @@ const TableComponent = () => {
   const [projects1, setProjects1] = useState([]);
   const [projectId, setProjectId] = useState(null); // Add this line
   const [isUpdating, setIsUpdating] = useState(false);
-
+  const [callSheetChartData, setCallSheetChartData] = useState([]);
   const [formData, setFormData] = useState({
     projectId: "",
     callSheetDate: "",
@@ -158,12 +158,31 @@ const TableComponent = () => {
 
   const rowsPerPage = 5;
 
-  useEffect(() => {
-    // Simulating data fetch
-    setTimeout(() => {
-      setIsGlobalLoading(false);
-    }, 1000);
-  }, []);
+
+  const transformCallSheetData = (apiData) => {
+    const projectCounts = {};
+  
+    // Iterate through the API data
+    apiData.forEach((callSheet) => {
+      const projectName = callSheet.project.projectName; // Use project name as the key
+  
+      // If the project already exists in the object, increment the count
+      if (projectCounts[projectName]) {
+        projectCounts[projectName]++;
+      } else {
+        // Otherwise, initialize the count to 1
+        projectCounts[projectName] = 1;
+      }
+    });
+  
+    // Convert the object into an array of { project, count } objects
+    const transformedData = Object.keys(projectCounts).map((project) => ({
+      project,
+      count: projectCounts[project],
+    }));
+  
+    return transformedData;
+  };
 
   const fetchCallSheets = async () => {
     try {
@@ -171,6 +190,9 @@ const TableComponent = () => {
       const response = await fetch("/api/getCallsheet");
       const result = await response.json();
       setProjects(result.data || []);
+      const transformedData = transformCallSheetData(result.data); // Transform data for chart
+      setCallSheetChartData(transformedData);
+      console.log("c",result.data)
     } catch (error) {
       console.error("Error fetching call sheets:", error);
     } finally {
@@ -316,17 +338,12 @@ const TableComponent = () => {
             </Col>
           </Row>
 
-          <div className="d-flex justify-content-end me-2">
-            <Link href="/callsheet/addCallsheet">
-              <Button variant="primary">Add CallSheet</Button>
-            </Link>
-          </div>
 
           <div className="d-flex justify-content-center flex-wrap mt-5 gap-3 mb-8 ms-4 me-4">
             <ChartsComponent
               type="bar"
-              options={ClientChartOptions}
-              series={[{ data: clientChartData }]}
+              options={getCallSheetChartOptions(callSheetChartData)} // Dynamic options
+              series={[{ data: callSheetChartData.map((item) => item.count) }]} 
               width="100%"
               height="300"
               containerStyle={{ flex: "0 0 100%" }}
@@ -335,11 +352,13 @@ const TableComponent = () => {
             />
           </div>
 
-          <Row className="mt-5 ms-2 me-2">
+          <Row className="mt-5 ms-3 me-4 p-0-important g-0" style={{padding:0 }}>
             <SearchExportComponent
               filterText={filterText}
               setFilterText={setFilterText}
               data={filteredData}
+              link="/callsheet/addCallsheet"
+              buttonText="Add CallSheet"
             />
             <DataTableComponent
               paginatedData={paginatedData}

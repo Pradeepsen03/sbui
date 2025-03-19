@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Users {
@@ -155,9 +156,12 @@ model CrewMembers {
 
   projects ProjectCrewMembers[] // Many-to-Many relationship with Projects
 
+  equipment Equipments[] // ✅ Added this field to complete the one-to-many relation
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 
 model ProjectCrewMembers {
   projectId   Int
@@ -166,4 +170,23 @@ model ProjectCrewMembers {
   crewMember  CrewMembers @relation(fields: [crewMemberId], references: [id])
 
   @@id([projectId, crewMemberId])
+}
+
+
+model Equipments {
+  id             Int     @id @default(autoincrement())
+  name           String
+  type           String
+  location       String
+  streetAddress  String?
+  streetAddress2 String?
+  city           String?
+  state          String?
+  zip            String?
+
+  crewMemberId   Int?
+  crewMember     CrewMembers? @relation(fields: [crewMemberId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

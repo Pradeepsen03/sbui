@@ -1026,6 +1026,62 @@ export const EquipmentChartOptions = {
   },
 };
 
+
+export const getEquipmentChartOptions = (equipmentChartData) => ({
+  chart: {
+    type: "bar",
+    toolbar: { show: true },
+  },
+  xaxis: {
+    categories: equipmentChartData.map((item) => item.type), // Dynamic categories
+    labels: { style: { colors: "#cccccc", fontSize: "10px" } },
+    title: { text: "Equipment Type" },
+    scrollbar: {
+      enabled: true,
+      height: 10,
+      show: true,
+    },
+  },
+  yaxis: {
+    labels: { style: { colors: "#cccccc", fontSize: "12px" } },
+    title: { text: "Equipment Count" },
+  },
+  grid: { show: false },
+  plotOptions: {
+    bar: {
+      columnWidth: "10%",
+      distributed: true, // Different colors for each bar
+    },
+  },
+  colors: ["#007BFF"], // Solid colors
+  dataLabels: { enabled: false },
+  fill: {
+    type: "solid",
+    opacity: 1,
+  },
+  legend: {
+    show: false, // Hides the legend
+  },
+  zoom: {
+    enabled: true,
+    type: "x",
+    autoScaleYaxis: true,
+  },
+  toolbar: {
+    show: true,
+    tools: {
+      download: true,
+      selection: true,
+      zoom: true,
+      zoomin: true,
+      zoomout: true,
+      pan: true,
+      reset: true,
+    },
+    autoSelected: "zoom",
+  },
+});
+
 const callProjectData = [
   { project: "Corporate Ad", calls: 30 },
   { project: "Music Video", calls: 20 },
@@ -1093,3 +1149,114 @@ export const CallProjectChartOptions = {
     autoSelected: "zoom",
   },
 };
+
+export const getCrewChartOptions = (crewChartData) => ({
+  chart: {
+    type: "bar",
+    toolbar: { show: true },
+  },
+  xaxis: {
+    categories: crewChartData.map((item) => item.role), // Dynamic categories
+    labels: { style: { colors: "#cccccc", fontSize: "10px" } },
+    title: { text: "Role Position" },
+    scrollbar: {
+      enabled: true,
+      height: 10,
+      show: true,
+    },
+  },
+  yaxis: {
+    labels: { style: { colors: "#cccccc", fontSize: "12px" } },
+    title: { text: "Crew Member Count" },
+  },
+  grid: { show: false },
+  plotOptions: {
+    bar: {
+      columnWidth: "10%",
+      distributed: true, // Different colors for each bar
+    },
+  },
+  colors: ["#007BFF"], // Solid colors
+  dataLabels: { enabled: false },
+  fill: {
+    type: "solid",
+    opacity: 1,
+  },
+  legend: {
+    show: false, // Hides the legend
+  },
+  zoom: {
+    enabled: true,
+    type: "x",
+    autoScaleYaxis: true,
+  },
+  toolbar: {
+    show: true,
+    tools: {
+      download: true,
+      selection: true,
+      zoom: true,
+      zoomin: true,
+      zoomout: true,
+      pan: true,
+      reset: true,
+    },
+    autoSelected: "zoom",
+  },
+});
+
+
+export const getCallSheetChartOptions = (callSheetChartData) => ({
+  chart: {
+    type: "bar",
+    toolbar: { show: true },
+  },
+  xaxis: {
+    categories: callSheetChartData.map((item) => item.project), // Dynamic categories
+    labels: { style: { colors: "#cccccc", fontSize: "10px" } },
+    title: { text: "Project Name" },
+    scrollbar: {
+      enabled: true,
+      height: 10,
+      show: true,
+    },
+  },
+  yaxis: {
+    labels: { style: { colors: "#cccccc", fontSize: "12px" } },
+    title: { text: "Call Sheet Count" },
+  },
+  grid: { show: false },
+  plotOptions: {
+    bar: {
+      columnWidth: "10%",
+      distributed: true, // Different colors for each bar
+    },
+  },
+  colors: ["#007BFF"], // Solid colors
+  dataLabels: { enabled: false },
+  fill: {
+    type: "solid",
+    opacity: 1,
+  },
+  legend: {
+    show: false, // Hides the legend
+  },
+  zoom: {
+    enabled: true,
+    type: "x",
+    autoScaleYaxis: true,
+  },
+  toolbar: {
+    show: true,
+    tools: {
+      download: true,
+      selection: true,
+      zoom: true,
+      zoomin: true,
+      zoomout: true,
+      pan: true,
+      reset: true,
+    },
+    autoSelected: "zoom",
+  },
+});

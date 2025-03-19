@@ -13,10 +13,10 @@ import {
   budgetChartData,
   ClientChartOptions,
   clientChartData,
-  equipmentChartData,
   EquipmentChartOptions,
   CallProjectChartOptions,
   callProjectChartData,
+  getEquipmentChartOptions,
 } from "../../../utils";
 import "../../../styles/dataTable.css";
 import { MdOutlineEdit } from "react-icons/md";
@@ -30,62 +30,59 @@ const TableComponent = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [isGlobalLoading, setIsGlobalLoading] = useState(true);
   const [errors, setErrors] = useState({});
-  const [projects, setProjects] = useState([]);
-  const [projectId, setProjectId] = useState(null); // Add this line
+  const [equipments, setEquipments] = useState([]);
+  const [equipmentId, setEquipmentId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [prodCompany, setProdCompany] = useState([]);
-  const [prodManager, setProdManager] = useState([]);
-  const [client, setClient] = useState([]);
-
+  const [crewMembers, setCrewMembers] = useState([]);
+  const [equipmentChartData, setChatEquipmentData] = useState([]);
   const [formData, setFormData] = useState({
-    projectId: "", // Add projectId to the state
-    projectManager: "",
-    projectName: "",
-    projectNumber: "",
-    startDate: "",
-    endDate: "",
-    status: "",
-    clientName: "",
-    productionCompany: "",
+    name: "",
+    type: "",
+    location: "",
+    streetAddress: "",
+    streetAddress2: "",
+    city: "",
+    state: "",
+    zip: "",
+    crewMemberId: "",
   });
 
   const handleShowAddModal = () => setShowAddModal(true);
   const handleCloseAddModal = () => {
     setShowAddModal(false);
     setFormData({
-      projectManager: "",
-      projectName: "",
-      projectNumber: "",
-      startDate: "",
-      endDate: "",
-      status: "",
-      clientName: "",
-      productionCompany: "",
+      name: "",
+      type: "",
+      location: "",
+      streetAddress: "",
+      streetAddress2: "",
+      city: "",
+      state: "",
+      zip: "",
+      crewMemberId: "",
     });
     setErrors({});
   };
+
   const handleShowEditModal = (row) => {
+    console.log("rrr", row);
     setFormData({
-      id: row.id, // Ensure ID is included for updating
-      firstName: row.firstName || "",
-      lastName: row.lastName || "",
-      email: row.email || "",
-      phone: row.phone || "",
+      id: row.id,
+      name: row.name || "",
+      type: row.type || "",
+      location: row.location || "",
       streetAddress: row.streetAddress || "",
       streetAddress2: row.streetAddress2 || "",
       city: row.city || "",
       state: row.state || "",
       zip: row.zip || "",
-      contactPersonFirst: row.contactPersonFirst || "",
-      contactPersonLast: row.contactPersonLast || "",
-      note: row.note || "",
+      crewMemberId: row.crewMemberId || "",
     });
-  
-    setProjectId(row.id); // Ensure projectId is set
+
+    setEquipmentId(row.id);
     setShowEditModal(true);
   };
-  
 
   const handleCloseEditModal = () => setShowEditModal(false);
 
@@ -97,34 +94,11 @@ const TableComponent = () => {
     }));
   };
 
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    validateField(name, value);
-  };
-
   const validateField = (name, value) => {
     let errorMsg = "";
 
     if (!value) {
       errorMsg = "This field is required";
-    } else {
-      if (name === "projectNumber" && value <= 0) {
-        errorMsg = "Project number must be positive";
-      }
-      if (
-        name === "startDate" &&
-        formData.endDate &&
-        value > formData.endDate
-      ) {
-        errorMsg = "Start date cannot be after end date";
-      }
-      if (
-        name === "endDate" &&
-        formData.startDate &&
-        value < formData.startDate
-      ) {
-        errorMsg = "End date cannot be before start date";
-      }
     }
 
     setErrors((prev) => ({
@@ -133,76 +107,38 @@ const TableComponent = () => {
     }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    Object.keys(formData).forEach((key) => {
-      if (!formData[key]) {
-        newErrors[key] = "This field is required";
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (validateForm()) {
-      setIsSubmitting(true);
-      try {
-        const res = await fetch("/api/createProject", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Project creation failed");
-        }
-        await fetchProjects();
-        handleCloseAddModal();
-      } catch (err) {
-        console.error(err.message);
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-  };
   const handleEditSubmit = async () => {
     if (!formData.id) {
-      console.error("Missing client ID");
+      console.error("Missing equipment ID");
       return;
     }
-  
+
     try {
       setIsUpdating(true);
-      console.log("Gggg",formData)
-  
-      const response = await fetch(`/api/editClient`, { // Ensure correct API endpoint
-        method: "PATCH",
+
+      const response = await fetch(`/api/editEquipment`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         console.log("Update Successful:", result);
-        await fetchProjects(); // Refresh project list
+        await fetchEquipments();
         handleCloseEditModal();
       } else {
         console.error("Update Failed:", result.error);
       }
     } catch (error) {
-      console.error("Error updating client:", error);
+      console.error("Error updating equipment:", error);
     } finally {
       setIsUpdating(false);
     }
   };
-  
 
   const rowsPerPage = 5;
 
@@ -211,21 +147,13 @@ const TableComponent = () => {
   useEffect(() => {
     async function fetchDropdownData() {
       try {
-        const [companyRes, managerRes, clientRes] = await Promise.all([
-          fetch("/api/getProductionCompany"),
-          fetch("/api/getProductManager"),
-          fetch("/api/getClientName"),
+        const [crewMembersRes] = await Promise.all([
+          fetch("/api/getCrewMembers"),
         ]);
 
-        const [companyData, managerData, clientData] = await Promise.all([
-          companyRes.json(),
-          managerRes.json(),
-          clientRes.json(),
-        ]);
+        const [crewMembersData] = await Promise.all([crewMembersRes.json()]);
 
-        setProdCompany(companyData.data);
-        setProdManager(managerData.data);
-        setClient(clientData.data);
+        setCrewMembers(crewMembersData.data);
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
       }
@@ -234,33 +162,58 @@ const TableComponent = () => {
     fetchDropdownData();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchEquipments = async () => {
     try {
       setIsGlobalLoading(true);
-      const response = await fetch("/api/getClient");
+      const response = await fetch("/api/getEquipment");
       const result = await response.json();
-      setProjects(result.data || []);
-      console.log('gg',result.data)
+      console.log("dhhh", result.data);
+      setEquipments(result.data || []);
+      transformEquipmentData(result.data);
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      console.error("Error fetching equipments:", error);
     } finally {
       setIsGlobalLoading(false);
     }
   };
 
-  console.log("kk", projects);
+  const transformEquipmentData = (apiData) => {
+    // Create an object to store the count of each type
+    const equipmentCounts = {};
+
+    // Iterate through the API data
+    apiData.forEach((item) => {
+      const type = item.type;
+
+      // If the type already exists in the object, increment the count
+      if (equipmentCounts[type]) {
+        equipmentCounts[type]++;
+      } else {
+        // Otherwise, initialize the count to 1
+        equipmentCounts[type] = 1;
+      }
+    });
+
+    // Convert the object into an array of { type, count } objects
+    const transformedData = Object.keys(equipmentCounts).map((type) => ({
+      type,
+      count: equipmentCounts[type],
+    }));
+    setChatEquipmentData(transformedData);
+    return transformedData;
+  };
 
   useEffect(() => {
-    fetchProjects();
+    fetchEquipments();
   }, []);
 
-  const filteredData = projects.filter(
+  const filteredData = equipments.filter(
     (item) =>
-      item.firstName.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.lastName.toLowerCase().includes(filterText.toLowerCase()) ||
-      item.email.toLowerCase().includes(filterText.toLowerCase()) ||
-      (item.phone &&
-        item.phone.toLowerCase().includes(filterText.toLowerCase())) ||
+      item.name.toLowerCase().includes(filterText.toLowerCase()) ||
+      item.type.toLowerCase().includes(filterText.toLowerCase()) ||
+      item.location.toLowerCase().includes(filterText.toLowerCase()) ||
+      (item.streetAddress &&
+        item.streetAddress.toLowerCase().includes(filterText.toLowerCase())) ||
       (item.city &&
         item.city.toLowerCase().includes(filterText.toLowerCase())) ||
       (item.state &&
@@ -278,29 +231,23 @@ const TableComponent = () => {
       name: "ID",
       selector: (row) => row.id,
       sortable: true,
-      width: "80px",
+      width: "70px",
     },
     {
-      name: "First Name",
-      selector: (row) => row.firstName,
+      name: "Name",
+      selector: (row) => row.name,
       sortable: true,
       width: "130px",
     },
     {
-      name: "Last Name",
-      selector: (row) => row.lastName,
+      name: "Type",
+      selector: (row) => row.type,
       sortable: true,
       width: "130px",
     },
     {
-      name: "Email",
-      selector: (row) => row.email,
-      sortable: true,
-      width: "200px",
-    },
-    {
-      name: "Phone",
-      selector: (row) => row.phone || "N/A",
+      name: "Location",
+      selector: (row) => row.location,
       sortable: true,
       width: "150px",
     },
@@ -310,7 +257,12 @@ const TableComponent = () => {
       sortable: true,
       width: "200px",
     },
-
+    {
+      name: "Street Address 2",
+      selector: (row) => row.streetAddress2 || "N/A",
+      sortable: true,
+      width: "200px",
+    },
     {
       name: "City",
       selector: (row) => row.city || "N/A",
@@ -327,19 +279,14 @@ const TableComponent = () => {
       name: "ZIP Code",
       selector: (row) => row.zip || "N/A",
       sortable: true,
-      width: "140px",
+      width: "112px",
     },
     {
-      name: "Contact Person",
+      name: "Crew Member",
       selector: (row) =>
-        `${row.contactPersonFirst || "N/A"} ${row.contactPersonLast || ""}`.trim(),
+        row.crewMember.firstName + " " + row.crewMember.lastName || "N/A",
       sortable: true,
-      width: "180px",
-    },
-    {
-      name: "Note",
-      selector: (row) => row.note || "N/A",
-      width: "250px",
+      width: "160px",
     },
     {
       name: "Created At",
@@ -363,7 +310,8 @@ const TableComponent = () => {
       width: "100px",
     },
   ];
-  
+
+  console.log("fhhfhc", equipmentChartData);
 
   return (
     <>
@@ -378,22 +326,21 @@ const TableComponent = () => {
           <Row>
             <Col lg={12} md={12} xs={12}>
               <div className="border-bottom pb-4 mb-4 mt-4 ms-4 ">
-                <h3 className="mb-0 fw-bold">Clients</h3>
+                <h3 className="mb-0 fw-bold">Equipments</h3>
               </div>
             </Col>
           </Row>
 
-
-          <div className="d-flex justify-content-center flex-wrap mt-5 gap-3 mb-8 ms-4 me-4">
+          <div className="d-flex justify-content-center flex-wrap mt-5 gap-3 mb-8 ms-3 me-3">
             <ChartsComponent
               type="bar"
-              options={ClientChartOptions}
-              series={[{ data: clientChartData }]}
+              options={getEquipmentChartOptions(equipmentChartData)} // Pass dynamic options
+              series={[{ data: equipmentChartData.map((item) => item.count) }]}
               width="100%"
               height="300"
               containerStyle={{ flex: "0 0 100%" }}
               containerClassname="p-3 bg-white rounded shadow"
-              title="Client Count by Contact Person"
+              title="Equipment Count by Type"
             />
           </div>
 
@@ -402,8 +349,8 @@ const TableComponent = () => {
               filterText={filterText}
               setFilterText={setFilterText}
               data={filteredData}
-                            link="/client/addClient"
-              buttonText="Add Client"
+              link="/equipments/addEquipment"
+              buttonText="Add Equipment"
             />
             <DataTableComponent
               paginatedData={paginatedData}
@@ -426,7 +373,7 @@ const TableComponent = () => {
             size="lg"
           >
             <Modal.Header closeButton>
-              <Modal.Title>Edit Client</Modal.Title>
+              <Modal.Title>Edit Equipment</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
@@ -434,22 +381,55 @@ const TableComponent = () => {
                 <Row className="mb-3">
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>First Name</Form.Label>
+                      <Form.Label>Name</Form.Label>
                       <Form.Control
                         type="text"
-                        name="firstName"
-                        value={formData.firstName}
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
                       />
                     </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Last Name</Form.Label>
+                      <Form.Label>Type</Form.Label>
                       <Form.Control
                         type="text"
-                        name="lastName"
-                        value={formData.lastName}
+                        name="type"
+                        value={formData.type}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row className="mb-3">
+                 
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Crew Member </Form.Label>
+                      <Form.Control
+                        as="select"
+                        name="crewMemberId"
+                        value={formData.crewMemberId}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Crew Member</option>
+                        {crewMembers.map((member) => (
+                          <option key={member.id} value={member.id}>
+                            {member.fullName}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Location</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="location"
+                        value={formData.location}
                         onChange={handleChange}
                       />
                     </Form.Group>
@@ -459,32 +439,7 @@ const TableComponent = () => {
                 <Row className="mb-3">
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Phone</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row className="mb-3">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Street Address</Form.Label>
+                      <Form.Label>Street Address 1</Form.Label>
                       <Form.Control
                         type="text"
                         name="streetAddress"
@@ -537,46 +492,6 @@ const TableComponent = () => {
                         name="zip"
                         value={formData.zip}
                         onChange={handleChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row className="mb-3">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Contact Person First Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="contactPersonFirst"
-                        value={formData.contactPersonFirst}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Contact Person Last Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="contactPersonLast"
-                        value={formData.contactPersonLast}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Row className="mb-3">
-                  <Col md={12}>
-                    <Form.Group>
-                      <Form.Label>Note</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        name="note"
-                        value={formData.note}
-                        onChange={handleChange}
-                        rows={3}
                       />
                     </Form.Group>
                   </Col>

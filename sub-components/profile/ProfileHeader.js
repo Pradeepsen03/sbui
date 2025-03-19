@@ -21,7 +21,7 @@ const ProfileHeader = () => {
               </div>
               {/* text */}
               <div className="lh-1">
-                <h2 className="mb-0">Jitu Chauhan
+                <h2 className="mb-0">{localStorage.getItem("email")}
                   <Link href="#!" className="text-decoration-none" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Beginner">
                   </Link>
                 </h2>

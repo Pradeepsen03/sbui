@@ -23,38 +23,45 @@ export const DashboardMenu = [
 	{
 		id: uuid(),
 		title: 'Vdashboard',
-		icon: 'layout',
+		icon: 'layers',
 		link: '/vdashboard',
 		role: [ "ADMIN"]
 	},
 	{
 		id: uuid(),
 		title: 'Projects',
-		icon: 'layout',
+		icon: 'folder',
 		link: '/projects',
 		role: [ "ADMIN"]
 	},
 	{
 		id: uuid(),
 		title: 'Clients',
-		icon: 'layout',
+		icon: 'user-plus',
 		link: '/client',
 		role: [ "ADMIN"]
 	},
 	{
 		id: uuid(),
 		title: 'CallSheets',
-		icon: 'layout',
+		icon: 'phone',
 		link: '/callsheet',
 		role: [ "ADMIN"]
 	},	
 	{
 		id: uuid(),
 		title: 'Crew Members',
-		icon: 'layout',
+		icon: 'users',
 		link: '/crewMember',
 		role: [ "ADMIN"]
-	}	
+	},
+	{
+		id: uuid(),
+		title: 'Equipments',
+		icon: 'camera ',
+		link: '/equipments',
+		role: [ "ADMIN"]
+	}		
 
 ];
 
